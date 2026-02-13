@@ -190,6 +190,17 @@ docker compose --env-file .env up -d auth-service user-service resource-service 
 Write-Host "  Waiting for services to start (this may take 30-60 seconds)..."
 Start-Sleep -Seconds 30
 
+# Start Vite dev server for frontend (background process, port 5173)
+Write-Host ""
+Write-Host "  Starting Vite dev server (frontend dev with HMR)..." -ForegroundColor Yellow
+$frontendDir = Join-Path $projectRoot "frontend"
+if (Test-Path (Join-Path $frontendDir "package.json")) {
+    Start-Process -FilePath "npm" -ArgumentList "run","dev" -WorkingDirectory $frontendDir -WindowStyle Hidden
+    Write-Host "  [OK] Vite dev server started on http://localhost:5173" -ForegroundColor Green
+} else {
+    Write-Host "  [WARN] frontend/package.json not found, skipping Vite" -ForegroundColor Yellow
+}
+
 # ============== STATUS ==============
 Write-Host ""
 Write-Host "[5/5] Checking service status..." -ForegroundColor Yellow
@@ -206,7 +217,7 @@ $services = @(
     @{ Name = "Audit Service"; Container = "iam-audit-service";         Port = "8084" },
     @{ Name = "Notif Service"; Container = "iam-notification-service";  Port = "8085" },
     @{ Name = "API Gateway";   Container = "iam-api-gateway";           Port = "8090" },
-    @{ Name = "Frontend";     Container = "iam-frontend";               Port = "3000" }
+    @{ Name = "Frontend";      Container = "iam-frontend";              Port = "3000" }
 )
 
 $ErrorActionPreference = "Continue"

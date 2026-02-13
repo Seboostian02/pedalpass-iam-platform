@@ -26,6 +26,18 @@ Write-Host ""
 # ============== STOP ==============
 Write-Host "[1/4] Stopping all containers..." -ForegroundColor Yellow
 
+# Kill Vite dev server (npm run dev) if running on port 5173
+$viteProc = Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
+if ($viteProc) {
+    foreach ($procId in $viteProc) {
+        $proc = Get-Process -Id $procId -ErrorAction SilentlyContinue
+        if ($proc -and $proc.ProcessName -eq "node") {
+            Write-Host "  Stopping Vite dev server (PID: $procId)..." -ForegroundColor Yellow
+            Stop-Process -Id $procId -Force
+        }
+    }
+}
+
 if ($RebuildAll) {
     docker compose --env-file .env down -v
     Write-Host "  [OK] All containers stopped + volumes removed" -ForegroundColor Green
@@ -87,6 +99,17 @@ if (-not $InfraOnly) {
 
     Write-Host "  Waiting for services to start (this may take 30-60 seconds)..."
     Start-Sleep -Seconds 30
+
+    # Start Vite dev server for frontend (background process, port 5173)
+    Write-Host ""
+    Write-Host "  Starting Vite dev server (frontend dev with HMR)..." -ForegroundColor Yellow
+    $frontendDir = Join-Path $projectRoot "frontend"
+    if (Test-Path (Join-Path $frontendDir "package.json")) {
+        Start-Process -FilePath "npm" -ArgumentList "run","dev" -WorkingDirectory $frontendDir -WindowStyle Hidden
+        Write-Host "  [OK] Vite dev server started on http://localhost:5173" -ForegroundColor Green
+    } else {
+        Write-Host "  [WARN] frontend/package.json not found, skipping Vite" -ForegroundColor Yellow
+    }
 } else {
     Write-Host ""
     Write-Host "[4/4] Skipping microservices (-InfraOnly mode)" -ForegroundColor Gray
