@@ -1,0 +1,4 @@
+-- Seed data script
+-- Note: Most seed data is handled by Flyway migrations in each service.
+-- This file is for any cross-database seed data that needs to run at init time.
+-- Currently empty - Flyway handles all seeding per service.
