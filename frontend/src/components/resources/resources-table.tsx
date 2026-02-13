@@ -115,7 +115,7 @@ export function ResourcesTable({ data, onRequestAccess, onEdit, canEdit }: Resou
   });
 
   return (
-    <div className="rounded-md border border-border">
+    <div className="overflow-x-auto rounded-md border border-border">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

@@ -7,6 +7,7 @@ import { SeverityBadge, AlertStatusBadge } from '@/components/shared/status-badg
 import { AlertActionDialog } from '@/components/audit/alert-action-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +16,16 @@ import { SEVERITY_LEVELS } from '@/lib/constants';
 import type { SecurityAlertResponse } from '@/types/audit';
 import { ScrollText, ShieldAlert, Search, X, ShieldCheck, ShieldOff } from 'lucide-react';
 import { format } from 'date-fns';
+
+function formatDetails(details?: string | null): string {
+  if (!details) return '—';
+  try {
+    const parsed = JSON.parse(details);
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    return details;
+  }
+}
 
 export default function AuditPage() {
   // Audit logs state
@@ -52,14 +63,14 @@ export default function AuditPage() {
       />
 
       <Tabs defaultValue="logs">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="logs" className="flex items-center gap-2">
             <ScrollText className="h-4 w-4" />
-            Audit Logs
+            <span className="hidden sm:inline">Audit</span> Logs
           </TabsTrigger>
           <TabsTrigger value="alerts" className="flex items-center gap-2">
             <ShieldAlert className="h-4 w-4" />
-            Security Alerts
+            <span className="hidden sm:inline">Security</span> Alerts
             {alertsQuery.data && alertsQuery.data.totalElements > 0 && (
               <span className="ml-1 rounded-full bg-severity-critical px-1.5 py-0.5 text-xs text-white">
                 {alertsQuery.data.totalElements}
@@ -71,8 +82,8 @@ export default function AuditPage() {
         {/* Audit Logs Tab */}
         <TabsContent value="logs" className="space-y-4">
           {/* Filters */}
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1 max-w-sm">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-0 flex-1 sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search logs..."
@@ -92,7 +103,7 @@ export default function AuditPage() {
               )}
             </div>
             <Select value={severityFilter} onValueChange={setSeverityFilter}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-full sm:w-[150px]">
                 <SelectValue placeholder="Severity" />
               </SelectTrigger>
               <SelectContent>
@@ -114,7 +125,7 @@ export default function AuditPage() {
             />
           ) : (
             <>
-              <div className="rounded-md border border-border">
+              <div className="overflow-x-auto rounded-md border border-border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -142,8 +153,19 @@ export default function AuditPage() {
                         <TableCell className="font-mono text-xs text-muted-foreground">
                           {log.ipAddress || '—'}
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
-                          {log.details || '—'}
+                        <TableCell className="text-xs text-muted-foreground max-w-[300px]">
+                          {log.details ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="block truncate cursor-help">{log.details}</span>
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-[500px] max-h-[300px] overflow-auto p-3">
+                                <pre className="text-xs whitespace-pre-wrap font-mono">
+                                  {formatDetails(log.details)}
+                                </pre>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : '—'}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -176,7 +198,7 @@ export default function AuditPage() {
             />
           ) : (
             <>
-              <div className="rounded-md border border-border">
+              <div className="overflow-x-auto rounded-md border border-border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -199,8 +221,15 @@ export default function AuditPage() {
                         <TableCell><SeverityBadge severity={alert.severity} /></TableCell>
                         <TableCell><AlertStatusBadge status={alert.status} /></TableCell>
                         <TableCell className="font-mono text-xs">{alert.userEmail || '—'}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[250px] truncate">
-                          {alert.description}
+                        <TableCell className="text-xs text-muted-foreground max-w-[300px]">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="block truncate cursor-help">{alert.description}</span>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-[500px] max-h-[300px] overflow-auto p-3">
+                              <p className="text-xs whitespace-pre-line">{alert.description}</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </TableCell>
                         <TableCell className="text-right">
                           {(alert.status === 'OPEN' || alert.status === 'INVESTIGATING') && (

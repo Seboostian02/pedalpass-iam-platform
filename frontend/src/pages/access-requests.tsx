@@ -40,10 +40,10 @@ export default function AccessRequestsPage() {
       />
 
       <Tabs defaultValue="my-requests">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="my-requests" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            My Requests
+            <span className="hidden sm:inline">My</span> Requests
             {myRequestsQuery.data && (
               <Badge variant="outline" className="ml-1 text-xs">{myRequestsQuery.data.totalElements}</Badge>
             )}
@@ -73,7 +73,7 @@ export default function AccessRequestsPage() {
             />
           ) : (
             <>
-              <div className="rounded-md border border-border">
+              <div className="overflow-x-auto rounded-md border border-border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -137,7 +137,7 @@ export default function AccessRequestsPage() {
               />
             ) : (
               <>
-                <div className="rounded-md border border-border">
+                <div className="overflow-x-auto rounded-md border border-border">
                   <Table>
                     <TableHeader>
                       <TableRow>

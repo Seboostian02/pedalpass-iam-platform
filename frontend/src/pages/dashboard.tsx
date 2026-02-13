@@ -31,7 +31,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
         <p className="text-muted-foreground">
           Welcome back, <span className="text-primary">{state.user?.firstName}</span>
         </p>
@@ -79,16 +79,16 @@ export default function DashboardPage() {
 
       {/* Quick info */}
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-border bg-card p-6">
+        <div className="overflow-hidden rounded-lg border border-border bg-card p-4 sm:p-6">
           <h3 className="mb-2 text-lg font-semibold">Your Account</h3>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Email</span>
-              <span className="font-mono text-xs">{state.user?.email}</span>
+            <div className="flex min-w-0 items-baseline justify-between gap-2">
+              <span className="shrink-0 text-muted-foreground">Email</span>
+              <span className="min-w-0 truncate font-mono text-xs">{state.user?.email}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Roles</span>
-              <div className="flex gap-1">
+            <div className="flex min-w-0 items-baseline justify-between gap-2">
+              <span className="shrink-0 text-muted-foreground">Roles</span>
+              <div className="flex flex-wrap gap-1">
                 {state.user?.roles.map((role) => (
                   <span key={role} className="rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
                     {role}
@@ -96,14 +96,14 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">User ID</span>
-              <span className="font-mono text-xs text-muted-foreground">{state.user?.id}</span>
+            <div className="flex min-w-0 items-baseline justify-between gap-2">
+              <span className="shrink-0 text-muted-foreground">User ID</span>
+              <span className="min-w-0 truncate font-mono text-xs text-muted-foreground">{state.user?.id}</span>
             </div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-border bg-card p-6">
+        <div className="overflow-hidden rounded-lg border border-border bg-card p-4 sm:p-6">
           <h3 className="mb-2 text-lg font-semibold">System Status</h3>
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">

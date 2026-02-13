@@ -23,7 +23,7 @@ export function ResourceFilters({
 }: ResourceFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <div className="relative flex-1 min-w-[200px] max-w-sm">
+      <div className="relative min-w-0 flex-1 basis-full sm:basis-auto sm:max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search resources..."
@@ -44,7 +44,7 @@ export function ResourceFilters({
       </div>
 
       <Select value={typeFilter} onValueChange={onTypeChange}>
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="w-[calc(50%-6px)] sm:w-[150px]">
           <SelectValue placeholder="Type" />
         </SelectTrigger>
         <SelectContent>
@@ -56,7 +56,7 @@ export function ResourceFilters({
       </Select>
 
       <Select value={categoryFilter} onValueChange={onCategoryChange}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[calc(50%-6px)] sm:w-[180px]">
           <SelectValue placeholder="Category" />
         </SelectTrigger>
         <SelectContent>

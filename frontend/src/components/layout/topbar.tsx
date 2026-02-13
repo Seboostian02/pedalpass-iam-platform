@@ -30,18 +30,17 @@ export function Topbar({ onMobileMenuToggle }: TopbarProps) {
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card/50 px-4 backdrop-blur-sm">
-      {/* Left: mobile menu */}
+      {/* Left: spacer (keeps right side aligned) */}
+      <div className="flex items-center gap-2" />
+
+      {/* Right: notifications + user + mobile menu */}
       <div className="flex items-center gap-2">
+        <NotificationBell />
         {onMobileMenuToggle && (
           <Button variant="ghost" size="sm" className="md:hidden" onClick={onMobileMenuToggle}>
             <Menu className="h-5 w-5" />
           </Button>
         )}
-      </div>
-
-      {/* Right: notifications + user */}
-      <div className="flex items-center gap-2">
-        <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

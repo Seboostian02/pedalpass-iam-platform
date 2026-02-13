@@ -31,7 +31,7 @@ export function ResourceCard({ resource, onRequestAccess, onEdit, canEdit }: Res
   console.log('[ResourceCard] Rendering:', resource.name, resource.resourceType);
 
   return (
-    <Card className="group transition-all hover:border-primary/30 hover:shadow-[0_0_15px_rgba(124,58,237,0.1)]">
+    <Card className="group h-full transition-all duration-300 hover:neon-border hover:glow-violet hover:scale-[1.01]">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
@@ -43,7 +43,7 @@ export function ResourceCard({ resource, onRequestAccess, onEdit, canEdit }: Res
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="flex flex-1 flex-col space-y-3">
         {resource.description && (
           <p className="text-sm text-muted-foreground line-clamp-2">{resource.description}</p>
         )}
@@ -66,7 +66,7 @@ export function ResourceCard({ resource, onRequestAccess, onEdit, canEdit }: Res
               : <><LockOpen className="h-3 w-3" /> Auto-approved</>}
           </span>
         </div>
-        <div className="flex items-center gap-2 pt-1">
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
           <Badge variant="outline" className={resource.active
             ? 'bg-status-approved/15 text-status-approved border-status-approved/30'
             : 'bg-status-denied/15 text-status-denied border-status-denied/30'

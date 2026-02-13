@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,8 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
-import { User, Shield, Save, KeyRound } from 'lucide-react';
+import { User, Shield, Save, KeyRound, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import type { ChangePasswordRequest } from '@/types/auth';
 
 const ROLE_COLORS: Record<string, string> = {
@@ -52,6 +53,10 @@ export default function ProfilePage() {
   const userId = state.user?.id || '';
   const { data: fullUser, isLoading } = useUser(userId);
   const updateUser = useUpdateUser();
+
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [rolesOpen, setRolesOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   const changePassword = useMutation({
     mutationFn: (request: ChangePasswordRequest) => authService.changePassword(request),
@@ -127,176 +132,224 @@ export default function ProfilePage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Edit Profile */}
-        <Card>
-          <CardHeader>
+        <Card className="overflow-hidden">
+          <CardHeader
+            className="cursor-pointer select-none"
+            onClick={() => setProfileOpen((v) => !v)}
+          >
             <CardTitle className="flex items-center gap-2 text-lg">
               <User className="h-5 w-5" />
               Personal Information
+              <ChevronDown
+                className={cn(
+                  'ml-auto h-4 w-4 text-muted-foreground transition-transform duration-300',
+                  profileOpen && 'rotate-180',
+                )}
+              />
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <div
+            className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+            style={{ gridTemplateRows: profileOpen ? '1fr' : '0fr' }}
+          >
+            <div className="overflow-hidden">
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="phoneNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+40 712 345 678" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="phoneNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+40 712 345 678" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>Email:</span>
-                  <span className="font-mono text-xs">{fullUser?.email}</span>
-                </div>
+                    <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+                      <span className="shrink-0">Email:</span>
+                      <span className="min-w-0 truncate font-mono text-xs">{fullUser?.email}</span>
+                    </div>
 
-                <Button type="submit" disabled={updateUser.isPending}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {updateUser.isPending ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
+                    <Button type="submit" disabled={updateUser.isPending}>
+                      <Save className="h-4 w-4 mr-2" />
+                      {updateUser.isPending ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </div>
+          </div>
         </Card>
 
         {/* Account Info */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden">
+            <CardHeader
+              className="cursor-pointer select-none"
+              onClick={() => setRolesOpen((v) => !v)}
+            >
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Shield className="h-5 w-5" />
                 Roles & Permissions
+                <ChevronDown
+                  className={cn(
+                    'ml-auto h-4 w-4 text-muted-foreground transition-transform duration-300',
+                    rolesOpen && 'rotate-180',
+                  )}
+                />
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Assigned Roles</p>
-                <div className="flex flex-wrap gap-2">
-                  {fullUser?.roles.map((role) => (
-                    <Badge key={role} variant="outline" className={`${ROLE_COLORS[role] || ''}`}>
-                      {role}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+            <div
+              className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+              style={{ gridTemplateRows: rolesOpen ? '1fr' : '0fr' }}
+            >
+              <div className="overflow-hidden">
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Assigned Roles</p>
+                    <div className="flex flex-wrap gap-2">
+                      {fullUser?.roles.map((role) => (
+                        <Badge key={role} variant="outline" className={`${ROLE_COLORS[role] || ''}`}>
+                          {role}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
 
-              <Separator />
+                  <Separator />
 
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Department</span>
-                  <span>{fullUser?.departmentName || '—'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Account Status</span>
-                  <Badge variant="outline" className={fullUser?.active
-                    ? 'bg-status-approved/15 text-status-approved border-status-approved/30'
-                    : 'bg-status-denied/15 text-status-denied border-status-denied/30'
-                  }>
-                    {fullUser?.active ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">User ID</span>
-                  <span className="font-mono text-xs text-muted-foreground">{fullUser?.id}</span>
-                </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex min-w-0 items-center justify-between gap-2">
+                      <span className="shrink-0 text-muted-foreground">Department</span>
+                      <span className="min-w-0 truncate">{fullUser?.departmentName || '—'}</span>
+                    </div>
+                    <div className="flex min-w-0 items-center justify-between gap-2">
+                      <span className="shrink-0 text-muted-foreground">Account Status</span>
+                      <Badge variant="outline" className={fullUser?.active
+                        ? 'bg-status-approved/15 text-status-approved border-status-approved/30'
+                        : 'bg-status-denied/15 text-status-denied border-status-denied/30'
+                      }>
+                        {fullUser?.active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                    <div className="flex min-w-0 items-center justify-between gap-2">
+                      <span className="shrink-0 text-muted-foreground">User ID</span>
+                      <span className="min-w-0 truncate font-mono text-xs text-muted-foreground">{fullUser?.id}</span>
+                    </div>
+                  </div>
+                </CardContent>
               </div>
-            </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden">
+            <CardHeader
+              className="cursor-pointer select-none"
+              onClick={() => setPasswordOpen((v) => !v)}
+            >
               <CardTitle className="flex items-center gap-2 text-lg">
                 <KeyRound className="h-5 w-5" />
                 Change Password
+                <ChevronDown
+                  className={cn(
+                    'ml-auto h-4 w-4 text-muted-foreground transition-transform duration-300',
+                    passwordOpen && 'rotate-180',
+                  )}
+                />
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <Form {...passwordForm}>
-                <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-                  <FormField
-                    control={passwordForm.control}
-                    name="oldPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Current Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div
+              className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+              style={{ gridTemplateRows: passwordOpen ? '1fr' : '0fr' }}
+            >
+              <div className="overflow-hidden">
+                <CardContent>
+                  <Form {...passwordForm}>
+                    <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+                      <FormField
+                        control={passwordForm.control}
+                        name="oldPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Current Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <FormField
-                    control={passwordForm.control}
-                    name="newPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>New Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      <FormField
+                        control={passwordForm.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>New Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <FormField
-                    control={passwordForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm New Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      <FormField
+                        control={passwordForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirm New Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <Button type="submit" disabled={changePassword.isPending}>
-                    <KeyRound className="h-4 w-4 mr-2" />
-                    {changePassword.isPending ? 'Changing...' : 'Change Password'}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
+                      <Button type="submit" disabled={changePassword.isPending}>
+                        <KeyRound className="h-4 w-4 mr-2" />
+                        {changePassword.isPending ? 'Changing...' : 'Change Password'}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </div>
+            </div>
           </Card>
         </div>
       </div>

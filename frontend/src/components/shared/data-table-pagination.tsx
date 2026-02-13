@@ -17,12 +17,12 @@ export function DataTablePagination({
   console.log('[DataTablePagination] Page:', page + 1, 'of', totalPages, 'total:', totalElements);
 
   return (
-    <div className="flex items-center justify-between px-2 py-4">
+    <div className="flex flex-wrap items-center justify-between gap-3 px-2 py-4">
       <div className="text-sm text-muted-foreground">
         {totalElements} total results
       </div>
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="hidden items-center gap-2 sm:flex">
           <span className="text-sm text-muted-foreground">Rows per page</span>
           <Select value={String(size)} onValueChange={(v) => onSizeChange(Number(v))}>
             <SelectTrigger className="h-8 w-[70px]">

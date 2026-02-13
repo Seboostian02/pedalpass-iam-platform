@@ -69,10 +69,10 @@ export default function NotificationsPage() {
       />
 
       <Tabs defaultValue="all">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="all" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />
-            All Notifications
+            <span className="hidden sm:inline">All</span> Notifications
           </TabsTrigger>
           <TabsTrigger value="preferences" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -113,7 +113,7 @@ export default function NotificationsPage() {
                           <span className="h-2 w-2 rounded-full bg-primary" />
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{notification.message}</p>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">{notification.message}</p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(notification.createdAt), 'MMM dd, yyyy HH:mm')}
                         {notification.emailSent && (
