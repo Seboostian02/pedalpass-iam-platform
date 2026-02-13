@@ -8,7 +8,7 @@ import { useRoles } from '@/hooks/use-roles';
 import { LoadingSpinner } from '@/components/shared/loading-spinner';
 import type { UserResponse } from '@/types/user';
 import { format } from 'date-fns';
-import { Shield, ShieldOff, UserX, Pencil, X } from 'lucide-react';
+import { Shield, UserX, Pencil, X } from 'lucide-react';
 import { useState } from 'react';
 
 const ROLE_COLORS: Record<string, string> = {

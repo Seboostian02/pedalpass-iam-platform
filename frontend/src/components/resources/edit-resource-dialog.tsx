@@ -16,7 +16,10 @@ const editResourceSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
   location: z.string().optional(),
-  capacity: z.coerce.number().int().positive().optional().or(z.literal('')),
+  capacity: z.string().optional().refine(
+    (val) => !val || (Number.isInteger(Number(val)) && Number(val) > 0),
+    { message: 'Must be a positive integer' }
+  ),
   requiresApproval: z.boolean(),
 });
 
@@ -49,7 +52,7 @@ export function EditResourceDialog({ resource, open, onClose }: EditResourceDial
         name: resource.name,
         description: resource.description || '',
         location: resource.location || '',
-        capacity: resource.capacity || ('' as any),
+        capacity: resource.capacity ? String(resource.capacity) : '',
         requiresApproval: resource.requiresApproval,
       });
     }

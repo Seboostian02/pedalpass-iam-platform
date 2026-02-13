@@ -21,7 +21,10 @@ const createResourceSchema = z.object({
     'APPLICATION', 'FILE_SHARE', 'VPN', 'DATABASE',
   ] as const),
   location: z.string().optional(),
-  capacity: z.coerce.number().int().positive().optional().or(z.literal('')),
+  capacity: z.string().optional().refine(
+    (val) => !val || (Number.isInteger(Number(val)) && Number(val) > 0),
+    { message: 'Must be a positive integer' }
+  ),
   requiresApproval: z.boolean(),
 });
 
