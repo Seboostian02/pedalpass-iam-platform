@@ -10,6 +10,11 @@ export interface RegisterRequest {
   lastName: string;
 }
 
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export interface TokenRefreshRequest {
   refreshToken: string;
 }

@@ -224,6 +224,25 @@ public class AuthService {
         log.info("Admin {} created user: {}", adminUserId, credential.getEmail());
     }
 
+    @Transactional
+    public void changePassword(UUID userId, ChangePasswordRequest request) {
+        UserCredential credential = userCredentialRepository.findById(userId)
+                .orElseThrow(() -> new BaseException("User not found", HttpStatus.NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), credential.getPasswordHash())) {
+            throw new BaseException("Current password is incorrect", HttpStatus.BAD_REQUEST);
+        }
+
+        credential.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userCredentialRepository.save(credential);
+
+        refreshTokenRepository.revokeAllByUserId(userId);
+
+        eventPublisher.publishPasswordChanged(userId, credential.getEmail());
+
+        log.info("Password changed for user: {}", credential.getEmail());
+    }
+
     private String generateSecurePassword() {
         String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         String lower = "abcdefghijklmnopqrstuvwxyz";

@@ -93,6 +93,19 @@ public class RabbitMQConfig {
                 .with(RabbitMQConstants.AUTH_ADMIN_USER_CREATED);
     }
 
+    // Password changed notification
+    @Bean
+    public Queue notifPasswordChangedQueue() {
+        return QueueBuilder.durable(RabbitMQConstants.NOTIFICATION_PASSWORD_CHANGED_QUEUE).build();
+    }
+
+    @Bean
+    public Binding notifPasswordChangedBinding() {
+        return BindingBuilder.bind(notifPasswordChangedQueue())
+                .to(iamEventsExchange())
+                .with(RabbitMQConstants.AUTH_PASSWORD_CHANGED);
+    }
+
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();

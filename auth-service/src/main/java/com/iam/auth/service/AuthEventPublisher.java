@@ -127,4 +127,23 @@ public class AuthEventPublisher {
                 event);
         log.debug("Published admin user created event for {}", email);
     }
+
+    public void publishPasswordChanged(UUID userId, String email) {
+        AuditEvent event = AuditEvent.builder()
+                .eventId(UUID.randomUUID())
+                .userId(userId)
+                .userEmail(email)
+                .action("PASSWORD_CHANGED")
+                .severity("INFO")
+                .serviceName("auth-service")
+                .timestamp(LocalDateTime.now())
+                .metadata(Map.of("action", "User changed password"))
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConstants.EVENTS_EXCHANGE,
+                RabbitMQConstants.AUTH_PASSWORD_CHANGED,
+                event);
+        log.debug("Published password changed event for {}", email);
+    }
 }

@@ -2,8 +2,10 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/auth-context';
 import { useUser, useUpdateUser } from '@/hooks/use-users';
+import { authService } from '@/services/auth.service';
 import { PageHeader } from '@/components/shared/page-header';
 import { LoadingSpinner } from '@/components/shared/loading-spinner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
-import { User, Shield, Save } from 'lucide-react';
+import { User, Shield, Save, KeyRound } from 'lucide-react';
+import { toast } from 'sonner';
+import type { ChangePasswordRequest } from '@/types/auth';
 
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: 'bg-severity-critical/15 text-severity-critical border-severity-critical/30',
@@ -30,11 +34,51 @@ const profileSchema = z.object({
 
 type ProfileForm = z.infer<typeof profileSchema>;
 
+const passwordSchema = z.object({
+  oldPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/, 'Must contain uppercase, lowercase, digit and special character (@$!%*?&)'),
+  confirmPassword: z.string().min(1, 'Please confirm your new password'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
+
+type PasswordForm = z.infer<typeof passwordSchema>;
+
 export default function ProfilePage() {
   const { state } = useAuth();
   const userId = state.user?.id || '';
   const { data: fullUser, isLoading } = useUser(userId);
   const updateUser = useUpdateUser();
+
+  const changePassword = useMutation({
+    mutationFn: (request: ChangePasswordRequest) => authService.changePassword(request),
+    onSuccess: () => {
+      toast.success('Password changed successfully');
+      passwordForm.reset();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to change password');
+    },
+  });
+
+  const passwordForm = useForm<PasswordForm>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
+
+  const onPasswordSubmit = (values: PasswordForm) => {
+    changePassword.mutate({
+      oldPassword: values.oldPassword,
+      newPassword: values.newPassword,
+    });
+  };
 
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -191,6 +235,67 @@ export default function ProfilePage() {
                   <span className="font-mono text-xs text-muted-foreground">{fullUser?.id}</span>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <KeyRound className="h-5 w-5" />
+                Change Password
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...passwordForm}>
+                <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+                  <FormField
+                    control={passwordForm.control}
+                    name="oldPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={passwordForm.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" disabled={changePassword.isPending}>
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    {changePassword.isPending ? 'Changing...' : 'Change Password'}
+                  </Button>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         </div>

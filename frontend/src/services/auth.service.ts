@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api';
-import type { LoginRequest, LoginResponse, RegisterRequest } from '@/types/auth';
+import type { ChangePasswordRequest, LoginRequest, LoginResponse, RegisterRequest } from '@/types/auth';
 import type { AdminCreateUserRequest } from '@/types/user';
 
 export const authService = {
@@ -38,5 +38,10 @@ export const authService = {
     console.log('[AuthService] Admin create user for:', request.email);
     const { data } = await apiClient.post<ApiResponse<void>>('/api/v1/auth/admin/create-user', request);
     if (!data.success) throw new Error(data.message || 'Failed to create user');
+  },
+
+  changePassword: async (request: ChangePasswordRequest): Promise<void> => {
+    const { data } = await apiClient.put<ApiResponse<void>>('/api/v1/auth/change-password', request);
+    if (!data.success) throw new Error(data.message || 'Failed to change password');
   },
 };

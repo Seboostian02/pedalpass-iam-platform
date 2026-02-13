@@ -152,4 +152,22 @@ public class NotificationEventListener {
                 "WELCOME"
         );
     }
+
+    @RabbitListener(queues = RabbitMQConstants.NOTIFICATION_PASSWORD_CHANGED_QUEUE)
+    public void handlePasswordChangedEvent(AuditEvent event) {
+        log.info("Received password changed event for {}", event.getUserEmail());
+
+        String emailBody = "Hello,\n\n" +
+                "Your IAM Platform password was successfully changed.\n\n" +
+                "If you did not make this change, please contact support immediately.\n\n" +
+                "Best regards,\nIAM Platform Team";
+
+        notificationService.createAndSendNotification(
+                event.getUserId(),
+                event.getUserEmail(),
+                "Password Changed",
+                emailBody,
+                "SECURITY"
+        );
+    }
 }

@@ -97,4 +97,18 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<Void>success("User created successfully. Temporary password sent via email.", null));
     }
+
+    @PutMapping("/change-password")
+    @Operation(summary = "Change password", description = "Changes the authenticated user's password. Revokes all refresh tokens.")
+    @SecurityRequirement(name = "Bearer Token")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Current password is incorrect or new password too weak")
+    })
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            @RequestHeader("X-User-Id") String userId) {
+        authService.changePassword(UUID.fromString(userId), request);
+        return ResponseEntity.ok(ApiResponse.<Void>success("Password changed successfully", null));
+    }
 }
