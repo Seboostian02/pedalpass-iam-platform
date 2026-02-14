@@ -5,6 +5,7 @@ import com.iam.notification.dto.NotificationPreferenceResponse;
 import com.iam.notification.dto.NotificationResponse;
 import com.iam.notification.dto.UpdatePreferenceRequest;
 import com.iam.notification.model.NotificationPreference;
+import com.iam.notification.model.NotificationType;
 import com.iam.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -91,6 +93,17 @@ public class NotificationController {
             @Parameter(description = "Notification ID") @PathVariable UUID id) {
         notificationService.deleteNotification(id);
         return ResponseEntity.ok(ApiResponse.<Void>success("Notification deleted", null));
+    }
+
+    @GetMapping("/types")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get notification types", description = "Retrieve available notification types")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Types retrieved")
+    })
+    public ResponseEntity<ApiResponse<List<String>>> getNotificationTypes() {
+        List<String> types = Arrays.stream(NotificationType.values()).map(Enum::name).toList();
+        return ResponseEntity.ok(ApiResponse.success("Notification types retrieved", types));
     }
 
     @GetMapping("/preferences")

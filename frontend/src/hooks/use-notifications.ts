@@ -61,6 +61,13 @@ export function useDeleteNotification() {
   });
 }
 
+export function useNotificationTypes() {
+  return useQuery({
+    queryKey: ['notification-types'],
+    queryFn: () => notificationService.getNotificationTypes(),
+  });
+}
+
 export function useNotificationPreferences() {
   return useQuery({
     queryKey: ['notification-preferences'],

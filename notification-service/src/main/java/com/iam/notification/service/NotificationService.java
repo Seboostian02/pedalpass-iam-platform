@@ -44,15 +44,28 @@ public class NotificationService {
     public Notification createAndSendNotification(UUID userId, String userEmail,
                                                    String title, String message,
                                                    String notificationType) {
-        boolean shouldEmail = true;
-        boolean shouldInApp = true;
+        boolean shouldEmail;
+        boolean shouldInApp;
 
         if (userId != null) {
             var prefOpt = preferenceRepository.findByUserIdAndNotificationType(userId, notificationType);
+            NotificationPreference pref;
             if (prefOpt.isPresent()) {
-                shouldEmail = prefOpt.get().isEmailEnabled();
-                shouldInApp = prefOpt.get().isInAppEnabled();
+                pref = prefOpt.get();
+            } else {
+                // Auto-create preference on first notification of this type (defaults: both enabled)
+                pref = preferenceRepository.save(NotificationPreference.builder()
+                        .userId(userId)
+                        .notificationType(notificationType)
+                        .build());
+                log.info("Auto-created preference for user {} type {} (email={}, inApp={})",
+                        userId, notificationType, pref.isEmailEnabled(), pref.isInAppEnabled());
             }
+            shouldEmail = pref.isEmailEnabled();
+            shouldInApp = pref.isInAppEnabled();
+        } else {
+            shouldEmail = false;
+            shouldInApp = false;
         }
 
         if (!shouldInApp && !shouldEmail) {
@@ -141,6 +154,10 @@ public class NotificationService {
         pref.setEmailEnabled(request.getEmailEnabled());
         pref.setInAppEnabled(request.getInAppEnabled());
         return preferenceRepository.save(pref);
+    }
+
+    public void sendEmailDirect(String to, String subject, String body) {
+        sendEmail(to, subject, body);
     }
 
     private void sendEmail(String to, String subject, String body) {

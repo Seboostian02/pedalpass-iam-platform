@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,12 @@ public class UserService {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.departmentRepository = departmentRepository;
+    }
+
+    public List<UserResponse> getUsersByRole(String roleName) {
+        return userRepository.findByRoleNameAndActiveTrue(roleName).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     public Page<UserResponse> getAllUsers(Pageable pageable) {

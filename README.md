@@ -22,11 +22,11 @@ The system runs 6 Spring Boot microservices behind an API Gateway, each with its
     |          |          |          |          |
     +-----+----+-----+----+-----+----+-----+---+
           |          |           |
-       RabbitMQ    Redis      MailHog
+       RabbitMQ    Redis      Mailpit
        :5672       :6379     :1025/:8025
 ```
 
-Infrastructure: PostgreSQL 16, RabbitMQ 3.13, Redis 7, MailHog (dev email), pgAdmin4 (DB UI)
+Infrastructure: PostgreSQL 16, RabbitMQ 3.13, Redis 7, Mailpit (dev email), pgAdmin4 (DB UI)
 
 ## Services
 
@@ -37,7 +37,7 @@ Infrastructure: PostgreSQL 16, RabbitMQ 3.13, Redis 7, MailHog (dev email), pgAd
 | User Service | 8082 | CRUD users, roles, departments, permissions (RBAC). Auto-sync from auth-service via RabbitMQ |
 | Resource Service | 8083 | Physical/digital resources, access request workflow, collision detection via RabbitMQ |
 | Audit Service | 8084 | Consumes all RabbitMQ events, audit logs with DTOs, security alerts, brute force detection, dismiss/resolve alerts |
-| Notification Service | 8085 | Email via MailHog, in-app notifications, user preferences (per type: email/in-app toggle), configurable MAIL_FROM |
+| Notification Service | 8085 | Email via Mailpit, in-app notifications, user preferences (auto-created, per type: email/in-app toggle), admin email on new access requests |
 | **Frontend** | **3000** | **React 19 SPA (PedalPass) — cyberpunk dark theme, role-based UI** |
 
 ## Frontend (PedalPass)
@@ -68,102 +68,6 @@ React 19 + TypeScript + Vite 7 application with cyberpunk dark theme (violet/pur
 - Collapsible sidebar with mobile Sheet drawer
 - Error boundary for graceful crash handling
 - Dockerized with nginx (SPA fallback + API proxy)
-
-## API endpoints
-
-### Auth Service
-
-```
-POST /api/v1/auth/register   - Register new user (returns JWT + refresh token)
-POST /api/v1/auth/login      - Login (returns JWT + refresh token)
-POST /api/v1/auth/refresh    - Refresh token rotation (old token revoked)
-POST /api/v1/auth/logout     - Blacklists JWT in Redis + revokes all refresh tokens
-```
-
-Password policy: min 8 chars, uppercase, lowercase, digit, special character (@$!%*?&)
-
-### User Service
-
-```
-GET    /api/v1/users              - List active users (paginated)
-GET    /api/v1/users/{id}         - Get user by ID
-POST   /api/v1/users              - Create user (ADMIN/user:write)
-PUT    /api/v1/users/{id}         - Update user profile
-DELETE /api/v1/users/{id}         - Deactivate user (ADMIN)
-POST   /api/v1/users/{id}/roles/{roleName}   - Assign role (ADMIN)
-DELETE /api/v1/users/{id}/roles/{roleName}   - Remove role (ADMIN)
-
-GET    /api/v1/roles              - List all roles with permissions
-GET    /api/v1/roles/{id}         - Get role by ID
-GET    /api/v1/roles/permissions  - List all permissions
-
-GET    /api/v1/departments        - List all departments
-GET    /api/v1/departments/{id}   - Get department by ID
-POST   /api/v1/departments        - Create department (ADMIN)
-PUT    /api/v1/departments/{id}   - Update department (ADMIN)
-DELETE /api/v1/departments/{id}   - Delete department (ADMIN)
-```
-
-RBAC roles: ADMIN, USER, GUEST, SECURITY_OFFICER, RESOURCE_MANAGER
-Permissions: user:read, user:write, user:delete, role:manage, resource:read/write/delete/request/approve, audit:read/export, system:config
-
-### Resource Service
-
-```
-GET    /api/v1/resources                          - List active resources (paginated)
-GET    /api/v1/resources/{id}                     - Get resource by ID
-GET    /api/v1/resources/type/{type}              - Filter by PHYSICAL or DIGITAL
-GET    /api/v1/resources/category/{category}      - Filter by MEETING_ROOM, PARKING, EQUIPMENT, etc.
-POST   /api/v1/resources                          - Create resource (ADMIN/RESOURCE_MANAGER)
-PUT    /api/v1/resources/{id}                     - Update resource (ADMIN/RESOURCE_MANAGER)
-DELETE /api/v1/resources/{id}                     - Deactivate resource + revoke all active requests
-
-GET    /api/v1/resources/{id}/access-requests     - List access requests for a resource
-POST   /api/v1/access-requests                    - Request access to a resource (any authenticated user)
-GET    /api/v1/access-requests/{id}               - Get access request by ID
-GET    /api/v1/access-requests/my                  - List my access requests (any authenticated user)
-GET    /api/v1/access-requests/pending            - List pending requests (ADMIN/RESOURCE_MANAGER)
-POST   /api/v1/access-requests/{id}/review        - Approve/deny with collision detection
-POST   /api/v1/access-requests/{id}/revoke        - Revoke approved access
-```
-
-Resource types: PHYSICAL, DIGITAL
-Resource categories: OFFICE, MEETING_ROOM, PARKING, EQUIPMENT, APPLICATION, FILE_SHARE, VPN, DATABASE
-Access request workflow: PENDING -> APPROVED / DENIED / COLLISION / REVOKED
-
-Collision detection: when approving a PHYSICAL resource request, the system checks for overlapping approved reservations. If a time conflict exists, the request is set to COLLISION and a `ResourceCollisionEvent` is published via RabbitMQ.
-
-### Audit Service
-
-```
-GET    /api/v1/audit/logs                      - All audit logs (paginated, ADMIN/SECURITY_OFFICER)
-GET    /api/v1/audit/logs/user/{userId}        - Logs filtered by user ID
-GET    /api/v1/audit/logs/action/{action}      - Logs filtered by action (e.g. LOGIN_FAILED)
-GET    /api/v1/audit/logs/severity/{severity}  - Logs filtered by severity (INFO/WARNING/CRITICAL)
-GET    /api/v1/audit/logs/range?start=&end=    - Logs within a date-time range
-GET    /api/v1/audit/alerts                    - All security alerts (paginated)
-GET    /api/v1/audit/alerts/open               - Open alerts only
-POST   /api/v1/audit/alerts/{id}/resolve       - Resolve alert (with optional comment)
-POST   /api/v1/audit/alerts/{id}/dismiss       - Dismiss alert (with optional reason)
-```
-
-Brute force detection: 5+ failed logins within 30 minutes triggers a CRITICAL security alert.
-
-### Notification Service
-
-```
-GET    /api/v1/notifications                   - My notifications (paginated)
-GET    /api/v1/notifications/unread            - Unread notifications only
-GET    /api/v1/notifications/unread/count      - Unread notification count
-POST   /api/v1/notifications/{id}/read         - Mark notification as read
-POST   /api/v1/notifications/read-all          - Mark all as read
-DELETE /api/v1/notifications/{id}              - Delete a notification
-GET    /api/v1/notifications/preferences       - Get notification preferences
-PUT    /api/v1/notifications/preferences       - Update preference (per type: email/in-app toggle)
-```
-
-Notification types: WELCOME, ACCESS, COLLISION, SECURITY
-User preferences: per notification type, toggle email and in-app independently.
 
 ## Swagger / OpenAPI
 
@@ -212,7 +116,7 @@ All scripts are in `scripts/` and must be run from the project root (`iam-platfo
 .\scripts\start-dev.ps1
 ```
 
-Starts all infrastructure (PostgreSQL, RabbitMQ, Redis, MailHog, pgAdmin4), all 6 microservices, and the frontend (PedalPass) in Docker containers. Waits for health checks and shows status + URLs at the end.
+Starts all infrastructure (PostgreSQL, RabbitMQ, Redis, Mailpit, pgAdmin4), all 6 microservices, and the frontend (PedalPass) in Docker containers. Waits for health checks and shows status + URLs at the end.
 
 Options:
 - `-InfraOnly` — start only infrastructure (useful for running services locally with `mvn spring-boot:run`)
@@ -279,7 +183,7 @@ After everything starts:
 | http://localhost:8084/actuator/health | Audit Service health check |
 | http://localhost:8085/actuator/health | Notification Service health check |
 | http://localhost:15672 | RabbitMQ Management UI (credentials in `.env`) |
-| http://localhost:8025 | MailHog — email testing UI |
+| http://localhost:8025 | Mailpit — email testing UI (replaced MailHog) |
 
 > Gateway runs on port **8090** both locally and via Docker (mapped `8090:8080`).
 
@@ -298,7 +202,7 @@ No passwords are hardcoded anywhere in the project (not in yml, docker-compose, 
 ```
 iam-platform/
 ├── pom.xml                 # parent POM (Spring Boot 3.3.5, Spring Cloud 2023.0.3)
-├── docker-compose.yml      # PostgreSQL, RabbitMQ, Redis, MailHog, pgAdmin4
+├── docker-compose.yml      # PostgreSQL, RabbitMQ, Redis, Mailpit, pgAdmin4
 ├── .env                    # secrets (gitignored)
 ├── common-lib/             # shared DTOs, events, exceptions, constants
 ├── api-gateway/            # Spring Cloud Gateway + JWT filter + centralized Swagger
@@ -369,6 +273,7 @@ docker compose up -d <service-name>
 - **Phase 4** - Resource Service: CRUD with DTOs/validation/Swagger, access request workflow (PENDING/APPROVED/DENIED/COLLISION/REVOKED), collision detection for physical resources, RabbitMQ event publishing, resource deactivation with cascading revocation
 - **Phase 5** - Audit Service + Notification Service: DTOs/Swagger/OpenAPI for both, RabbitMQ event type fixes (mixed event deserialization), brute force detection (5 failed logins → CRITICAL alert), security alert workflow (resolve/dismiss), notification preferences (per-type email/in-app toggle), configurable MAIL_FROM, login failed email alerts, GlobalExceptionHandler for both services
 - **Phase 6** - React frontend (PedalPass): React 19 + Vite 7 + Tailwind v4 + shadcn/ui, cyberpunk dark theme, JWT auth with refresh queue, role-based routing, 8 pages (Dashboard, Users, Resources, Access Requests, Audit, Notifications, Profile, 404), TanStack Table/Query, Dockerized with nginx
+- **Phase 6.5** - Replaced MailHog with Mailpit due to MailHog bugs (500 errors, emails disappearing after viewing). Added NotificationType enum, auto-created notification preferences, admin email notifications for access requests (inter-service REST call to user-service)
 - **Phase 7** - MFA, security hardening
 
 ## Built with

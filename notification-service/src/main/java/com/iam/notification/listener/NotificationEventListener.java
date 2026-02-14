@@ -5,7 +5,9 @@ import com.iam.common.events.AccessDecisionEvent;
 import com.iam.common.events.AccessRequestEvent;
 import com.iam.common.events.AuditEvent;
 import com.iam.common.events.ResourceCollisionEvent;
+import com.iam.notification.model.NotificationType;
 import com.iam.notification.service.NotificationService;
+import com.iam.notification.service.UserServiceClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,17 +15,22 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class NotificationEventListener {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationEventListener.class);
 
     private final NotificationService notificationService;
+    private final UserServiceClient userServiceClient;
     private final ObjectMapper objectMapper;
 
     public NotificationEventListener(NotificationService notificationService,
+                                     UserServiceClient userServiceClient,
                                      ObjectMapper objectMapper) {
         this.notificationService = notificationService;
+        this.userServiceClient = userServiceClient;
         this.objectMapper = objectMapper;
     }
 
@@ -35,7 +42,7 @@ public class NotificationEventListener {
                 event.getUserEmail(),
                 "Welcome to IAM Platform",
                 "Your account has been created successfully. Welcome to the IAM Platform!",
-                "WELCOME"
+                NotificationType.WELCOME.name()
         );
     }
 
@@ -52,8 +59,11 @@ public class NotificationEventListener {
                         event.getUserEmail(),
                         "Access Request Submitted",
                         "Your access request for " + event.getResourceName() + " has been submitted and is pending review.",
-                        "ACCESS"
+                        NotificationType.ACCESS.name()
                 );
+
+                // Notify admins and resource managers about the pending request
+                notifyAdminsAboutAccessRequest(event);
             } else {
                 AccessDecisionEvent event = objectMapper.readValue(message.getBody(), AccessDecisionEvent.class);
                 String title = switch (event.getDecision()) {
@@ -74,7 +84,7 @@ public class NotificationEventListener {
                         event.getUserEmail(),
                         title,
                         body,
-                        "ACCESS"
+                        NotificationType.ACCESS.name()
                 );
             }
         } catch (Exception e) {
@@ -94,7 +104,7 @@ public class NotificationEventListener {
                     "A scheduling conflict was detected for resource " + event.getResourceName() +
                             " between " + event.getRequestedFrom() + " and " + event.getRequestedUntil() +
                             ". Please choose a different time slot.",
-                    "COLLISION"
+                    NotificationType.COLLISION.name()
             );
         } catch (Exception e) {
             log.error("Error processing collision event: {}", e.getMessage(), e);
@@ -110,7 +120,7 @@ public class NotificationEventListener {
                     event.getUserEmail(),
                     "Security Alert",
                     "A security alert has been triggered for your account: " + event.getAction(),
-                    "SECURITY"
+                    NotificationType.SECURITY.name()
             );
         }
     }
@@ -124,7 +134,7 @@ public class NotificationEventListener {
                     event.getUserEmail(),
                     "Failed Login Attempt",
                     "A failed login attempt was detected on your account. If this was not you, please change your password immediately.",
-                    "SECURITY"
+                    NotificationType.SECURITY.name()
             );
         }
     }
@@ -149,8 +159,44 @@ public class NotificationEventListener {
                 event.getUserEmail(),
                 "Your IAM Platform Account",
                 emailBody,
-                "WELCOME"
+                NotificationType.WELCOME.name()
         );
+    }
+
+    private void notifyAdminsAboutAccessRequest(AccessRequestEvent event) {
+        try {
+            List<String> adminEmails = userServiceClient.getEmailsByRole("ADMIN");
+            List<String> managerEmails = userServiceClient.getEmailsByRole("RESOURCE_MANAGER");
+
+            // Combine and deduplicate
+            java.util.Set<String> allApprovers = new java.util.LinkedHashSet<>();
+            allApprovers.addAll(adminEmails);
+            allApprovers.addAll(managerEmails);
+            // Don't notify the requester themselves
+            allApprovers.remove(event.getUserEmail());
+
+            String emailBody = String.format(
+                    "Hello,\n\n" +
+                    "A new access request requires your review.\n\n" +
+                    "Requested by: %s\n" +
+                    "Resource: %s\n" +
+                    "Access level: %s\n" +
+                    "Justification: %s\n\n" +
+                    "Please log in to the IAM Platform to review this request.\n\n" +
+                    "Best regards,\nIAM Platform Team",
+                    event.getUserEmail(),
+                    event.getResourceName(),
+                    event.getAccessLevel(),
+                    event.getJustification() != null ? event.getJustification() : "N/A");
+
+            for (String approverEmail : allApprovers) {
+                notificationService.sendEmailDirect(approverEmail, "New Access Request Pending Review", emailBody);
+            }
+
+            log.info("Notified {} approvers about access request from {}", allApprovers.size(), event.getUserEmail());
+        } catch (Exception e) {
+            log.error("Failed to notify admins about access request: {}", e.getMessage(), e);
+        }
     }
 
     @RabbitListener(queues = RabbitMQConstants.NOTIFICATION_PASSWORD_CHANGED_QUEUE)
@@ -167,7 +213,7 @@ public class NotificationEventListener {
                 event.getUserEmail(),
                 "Password Changed",
                 emailBody,
-                "SECURITY"
+                NotificationType.SECURITY.name()
         );
     }
 }

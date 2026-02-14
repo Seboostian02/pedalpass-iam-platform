@@ -165,8 +165,8 @@ export default function NotificationsPage() {
           ) : !preferencesQuery.data?.length ? (
             <EmptyState
               icon={<Settings className="h-12 w-12" />}
-              title="No preferences"
-              description="Notification preferences will appear once configured"
+              title="No preferences yet"
+              description="Notification preferences will appear here once you receive your first notifications"
             />
           ) : (
             <Card>
@@ -191,8 +191,8 @@ export default function NotificationsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {preferencesQuery.data.map((pref) => (
-                      <TableRow key={pref.id}>
+                    {(preferencesQuery.data ?? []).map((pref) => (
+                      <TableRow key={pref.notificationType}>
                         <TableCell>
                           <Badge variant="outline" className={`text-xs ${TYPE_COLORS[pref.notificationType] || ''}`}>
                             {pref.notificationType}

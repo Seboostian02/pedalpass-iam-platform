@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,6 +39,14 @@ public class UserController {
     })
     public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(Pageable pageable) {
         Page<UserResponse> users = userService.getAllUsers(pageable);
+        return ResponseEntity.ok(ApiResponse.success("Users retrieved", users));
+    }
+
+    @GetMapping("/by-role/{roleName}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('user:read')")
+    @Operation(summary = "Get users by role", description = "Returns all active users with the specified role")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getUsersByRole(@PathVariable String roleName) {
+        List<UserResponse> users = userService.getUsersByRole(roleName);
         return ResponseEntity.ok(ApiResponse.success("Users retrieved", users));
     }
 

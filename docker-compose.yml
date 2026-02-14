@@ -59,14 +59,13 @@ services:
       retries: 5
     restart: unless-stopped
 
-  mailhog:
-    image: mailhog/mailhog:latest
-    container_name: iam-mailhog
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: iam-mailpit
     environment:
-      MH_STORAGE: maildir
-      MH_MAILDIR_PATH: /maildir
+      MP_DATABASE: /data/mailpit.db
     volumes:
-      - mailhog_data:/maildir
+      - mailpit_data:/data
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -254,15 +253,17 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-      SMTP_HOST: mailhog
+      SMTP_HOST: mailpit
       SMTP_PORT: 1025
       MAIL_FROM: ${MAIL_FROM}
+      USER_SERVICE_HOST: user-service
+      USER_SERVICE_PORT: 8082
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      mailhog:
+      mailpit:
         condition: service_started
     networks:
       - iam-network
@@ -316,7 +317,7 @@ volumes:
   rabbitmq_data:
   redis_data:
   pgadmin_data:
-  mailhog_data:
+  mailpit_data:
 
 networks:
   iam-network:

@@ -57,6 +57,14 @@ export const notificationService = {
     return data.data!;
   },
 
+  getNotificationTypes: async (): Promise<string[]> => {
+    console.log('[NotificationService] Fetching notification types');
+    const { data } = await apiClient.get<ApiResponse<string[]>>('/api/v1/notifications/types');
+    console.log('[NotificationService] Notification types:', data.data);
+    if (!data.success) throw new Error(data.message);
+    return data.data!;
+  },
+
   updatePreference: async (request: UpdatePreferenceRequest): Promise<NotificationPreferenceResponse> => {
     console.log('[NotificationService] Updating preference:', request.notificationType, 'email:', request.emailEnabled, 'inApp:', request.inAppEnabled);
     const { data } = await apiClient.put<ApiResponse<NotificationPreferenceResponse>>('/api/v1/notifications/preferences', request);
