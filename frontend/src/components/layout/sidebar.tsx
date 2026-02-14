@@ -23,8 +23,8 @@ const NAV_ITEMS = [
 ];
 
 const NAV_BASE = 'group/nav flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 border-l-2 bg-sidebar';
-const NAV_ACTIVE = 'bg-gradient-to-r from-[oklch(0.16_0.08_285)] to-sidebar text-sidebar-primary border-primary shadow-[inset_3px_0_10px_rgba(124,58,237,0.15)]';
-const NAV_INACTIVE = 'text-sidebar-foreground/60 border-transparent hover:bg-[oklch(0.13_0.03_280)] hover:text-sidebar-foreground hover:border-primary/30';
+const NAV_ACTIVE = 'bg-gradient-to-r from-neon-lavender/8 to-sidebar text-neon-lavender border-neon-lavender shadow-[inset_3px_0_12px_rgba(224,163,255,0.12)]';
+const NAV_INACTIVE = 'text-sidebar-foreground/60 border-transparent hover:bg-neon-lavender/4 hover:text-sidebar-foreground hover:border-neon-lavender/30';
 
 interface SidebarProps {
   side?: 'left' | 'right';
@@ -58,11 +58,11 @@ export function Sidebar({ side = 'left' }: SidebarProps) {
       </div>
 
       {/* Logo */}
-      <div className="relative z-10 flex h-16 items-center gap-3 px-3">
-        <img src={logoSvg} alt="PedalPass" className="h-8 w-8 shrink-0" />
+      <div className="relative z-10 flex h-20 items-center gap-3 px-4 bg-sidebar">
+        <img src={logoSvg} alt="PedalPass" className="h-13 w-13 shrink-0" style={{ animation: 'logo-glow 3s ease-in-out infinite' }} />
         {!collapsed && (
-          <span className="text-lg font-bold tracking-tight text-foreground neon-text">
-            Pedal<span className="text-primary">Pass</span>
+          <span className="text-lg font-bold tracking-tight gradient-text neon-text">
+            PedalPass
           </span>
         )}
       </div>

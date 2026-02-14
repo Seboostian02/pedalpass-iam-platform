@@ -44,8 +44,21 @@ export function AppLayout() {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar onMobileMenuToggle={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-6">
-          <div key={location.pathname} className="animate-fade-in">
+        <main className="relative flex-1 overflow-y-auto p-3 sm:p-6">
+          {/* Animated gradient background */}
+          <div
+            className="pointer-events-none fixed inset-0 -z-10"
+            aria-hidden="true"
+            style={{
+              backgroundImage: `
+                radial-gradient(ellipse at 20% 80%, rgba(224, 163, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 105, 180, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 40%, rgba(147, 112, 219, 0.05) 0%, transparent 60%)
+              `,
+              animation: 'bg-pulse 16s ease-in-out infinite',
+            }}
+          />
+          <div key={location.pathname} className="relative animate-fade-in">
             <Outlet />
           </div>
         </main>

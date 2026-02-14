@@ -4,10 +4,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ===== PedalPass Cyberpunk Theme ===== */
+/* ===== PedalPass Cyberpunk Theme — Neural Glass ===== */
 
-/* Custom theme colors (available as Tailwind utilities: bg-cyber-violet, text-severity-info, etc.) */
 @theme {
+  /* Neon palette (Neural Glass inspired) */
+  --color-neon-lavender: #e0a3ff;
+  --color-neon-pink: #ff69b4;
+  --color-neon-purple: #9370db;
+  --color-neon-cyan: #00ffff;
+  --color-neon-magenta: #ff0080;
+
+  /* Cyber accent colors */
   --color-cyber-violet: #7c3aed;
   --color-cyber-purple: #a855f7;
   --color-cyber-red: #ef4444;
@@ -18,6 +25,7 @@
   --color-cyber-glow: #8b5cf6;
   --color-cyber-cyan: #06b6d4;
 
+  /* Semantic colors */
   --color-severity-info: #3b82f6;
   --color-severity-warning: #f59e0b;
   --color-severity-critical: #ef4444;
@@ -29,11 +37,12 @@
   --color-status-revoked: #737373;
   --color-status-expired: #525252;
 
+  /* Typography */
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
-/* shadcn/ui required theme inline block (maps CSS vars to Tailwind color utilities) */
+/* shadcn/ui required theme inline block */
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -75,59 +84,59 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Cyberpunk dark-only theme - no light mode */
+/* Cyberpunk dark-only theme — Neural Glass */
 :root {
   --radius: 0.5rem;
 
-  /* Core surfaces - deep dark with purple undertones */
-  --background: oklch(0.08 0.02 280);
-  --foreground: oklch(0.9 0.01 280);
+  /* Core surfaces — near-black with purple undertones */
+  --background: oklch(0.06 0.02 280);
+  --foreground: oklch(0.93 0.01 280);
 
-  --card: oklch(0.13 0.02 280);
-  --card-foreground: oklch(0.9 0.01 280);
+  --card: oklch(0.1 0.015 280);
+  --card-foreground: oklch(0.93 0.01 280);
 
-  --popover: oklch(0.11 0.02 280);
-  --popover-foreground: oklch(0.9 0.01 280);
+  --popover: oklch(0.08 0.02 280);
+  --popover-foreground: oklch(0.93 0.01 280);
 
-  /* Primary - violet */
+  /* Primary — violet */
   --primary: oklch(0.55 0.25 285);
   --primary-foreground: oklch(1 0 0);
 
-  /* Secondary - muted purple surface */
-  --secondary: oklch(0.18 0.03 280);
+  /* Secondary — muted purple surface */
+  --secondary: oklch(0.15 0.025 280);
   --secondary-foreground: oklch(0.9 0.01 280);
 
-  /* Muted - subtle dark */
-  --muted: oklch(0.2 0.02 280);
+  /* Muted */
+  --muted: oklch(0.17 0.02 280);
   --muted-foreground: oklch(0.55 0.02 280);
 
-  /* Accent - lighter purple */
+  /* Accent — lighter purple */
   --accent: oklch(0.6 0.2 300);
   --accent-foreground: oklch(1 0 0);
 
-  /* Destructive - strident red */
+  /* Destructive */
   --destructive: oklch(0.63 0.24 25);
 
-  /* Borders - subtle purple */
-  --border: oklch(0.25 0.04 280);
-  --input: oklch(0.25 0.04 280);
+  /* Borders — subtle neon-tinted */
+  --border: oklch(0.2 0.04 280);
+  --input: oklch(0.3 0.06 280);
   --ring: oklch(0.55 0.25 285);
 
-  /* Charts - cyberpunk palette */
+  /* Charts */
   --chart-1: oklch(0.55 0.25 285);
   --chart-2: oklch(0.63 0.24 25);
   --chart-3: oklch(0.6 0.2 300);
   --chart-4: oklch(0.7 0.15 330);
   --chart-5: oklch(0.45 0.15 350);
 
-  /* Sidebar - even darker */
-  --sidebar: oklch(0.1 0.02 280);
+  /* Sidebar — deepest dark */
+  --sidebar: oklch(0.05 0.02 280);
   --sidebar-foreground: oklch(0.9 0.01 280);
   --sidebar-primary: oklch(0.55 0.25 285);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.6 0.2 300);
   --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.2 0.03 280);
+  --sidebar-border: oklch(0.16 0.03 280);
   --sidebar-ring: oklch(0.55 0.25 285);
 }
 
@@ -137,10 +146,17 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Neural Glass background — layered radial gradient orbs */
+    background-image:
+      radial-gradient(ellipse at 15% 80%, rgba(75, 0, 130, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 20%, rgba(139, 37, 99, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(128, 0, 128, 0.08) 0%, transparent 60%);
+    background-attachment: fixed;
   }
 }
 
-/* Scrollbar styling */
+/* ===== Scrollbar — neon gradient ===== */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -151,18 +167,19 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.25 0.04 280);
+  background: linear-gradient(180deg, #9370db, #e0a3ff);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.35 0.06 280);
+  background: linear-gradient(180deg, #e0a3ff, #ff69b4);
+  box-shadow: 0 0 8px rgba(224, 163, 255, 0.5);
 }
 
 /* ===== Glow Utilities ===== */
 
 @utility glow-violet {
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.2), 0 0 40px rgba(124, 58, 237, 0.05);
+  box-shadow: 0 0 20px rgba(224, 163, 255, 0.15), 0 0 40px rgba(147, 112, 219, 0.08);
 }
 
 @utility glow-red {
@@ -170,50 +187,71 @@
 }
 
 @utility glow-purple {
-  box-shadow: 0 0 25px rgba(168, 85, 247, 0.15), 0 0 50px rgba(168, 85, 247, 0.05);
+  box-shadow: 0 0 25px rgba(224, 163, 255, 0.12), 0 0 50px rgba(147, 112, 219, 0.06);
 }
 
 @utility glow-cyan {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.2), 0 0 40px rgba(6, 182, 212, 0.05);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15), 0 0 40px rgba(0, 255, 255, 0.05);
+}
+
+@utility glow-pink {
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.15), 0 0 40px rgba(255, 105, 180, 0.05);
 }
 
 /* ===== Neon Utilities ===== */
 
 @utility neon-border {
-  border: 1px solid rgba(124, 58, 237, 0.3);
-  box-shadow: inset 0 0 20px rgba(124, 58, 237, 0.03), 0 0 8px rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(224, 163, 255, 0.2);
+  box-shadow: inset 0 0 20px rgba(224, 163, 255, 0.03), 0 0 12px rgba(224, 163, 255, 0.08);
 }
 
 @utility neon-line {
-  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(224, 163, 255, 0.4), rgba(255, 105, 180, 0.2), transparent);
   height: 1px;
 }
 
 @utility neon-text {
-  text-shadow: 0 0 10px rgba(124, 58, 237, 0.5), 0 0 30px rgba(124, 58, 237, 0.15);
+  text-shadow: 0 0 10px rgba(224, 163, 255, 0.6), 0 0 30px rgba(224, 163, 255, 0.2);
 }
 
 @utility neon-edge-r {
-  border-right: 1px solid rgba(124, 58, 237, 0.35);
-  box-shadow: 1px 0 12px rgba(124, 58, 237, 0.12), 1px 0 4px rgba(124, 58, 237, 0.18);
+  border-right: 1px solid rgba(224, 163, 255, 0.2);
+  box-shadow: 1px 0 15px rgba(224, 163, 255, 0.08), 1px 0 5px rgba(255, 105, 180, 0.06);
 }
 
 @utility neon-edge-l {
-  border-left: 1px solid rgba(124, 58, 237, 0.35);
-  box-shadow: -1px 0 12px rgba(124, 58, 237, 0.12), -1px 0 4px rgba(124, 58, 237, 0.18);
+  border-left: 1px solid rgba(224, 163, 255, 0.2);
+  box-shadow: -1px 0 15px rgba(224, 163, 255, 0.08), -1px 0 5px rgba(255, 105, 180, 0.06);
+}
+
+/* ===== Glass Utilities ===== */
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@utility glass-strong {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Gradient Text ===== */
+
+@utility gradient-text {
+  background: linear-gradient(135deg, #e0a3ff 0%, #ff69b4 50%, #9370db 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* ===== Keyframe Animations ===== */
 
 @keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @utility animate-fade-in {
@@ -223,6 +261,23 @@
 @keyframes neon-pulse {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
+}
+
+@keyframes border-glow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(224, 163, 255, 0.6)); }
+  50% { filter: drop-shadow(0 0 16px rgba(255, 105, 180, 0.8)); }
+}
+
+@keyframes bg-pulse {
+  0%, 100% { opacity: 0.5; }
+  33% { opacity: 0.9; }
+  66% { opacity: 0.7; }
 }
 
 @keyframes vein-flow-200 {

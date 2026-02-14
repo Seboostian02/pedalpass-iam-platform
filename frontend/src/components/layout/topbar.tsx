@@ -29,7 +29,7 @@ export function Topbar({ onMobileMenuToggle }: TopbarProps) {
   };
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-card/50 px-4 backdrop-blur-sm">
+    <header className="flex h-16 items-center justify-between border-b border-neon-lavender/12 bg-card/40 px-4 backdrop-blur-md">
       {/* Left: spacer (keeps right side aligned) */}
       <div className="flex items-center gap-2" />
 

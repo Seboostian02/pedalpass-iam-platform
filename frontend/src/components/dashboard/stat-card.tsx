@@ -12,7 +12,7 @@ interface StatCardProps {
 
 export function StatCard({ title, value, icon, loading, className }: StatCardProps) {
   return (
-    <Card className={cn('transition-all duration-300 hover:neon-border hover:glow-violet', className)}>
+    <Card className={cn('transition-all duration-300 hover:neon-border hover:glow-violet hover:shadow-[0_0_25px_rgba(224,163,255,0.1)]', className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <div className="text-primary">{icon}</div>

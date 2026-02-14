@@ -31,7 +31,7 @@ export function ResourceCard({ resource, onRequestAccess, onEdit, canEdit }: Res
   console.log('[ResourceCard] Rendering:', resource.name, resource.resourceType);
 
   return (
-    <Card className="group h-full transition-all duration-300 hover:neon-border hover:glow-violet hover:scale-[1.01]">
+    <Card className="group h-full transition-all duration-300 hover:neon-border hover:glow-violet hover:scale-[1.01] hover:shadow-[0_0_25px_rgba(224,163,255,0.1)]">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">

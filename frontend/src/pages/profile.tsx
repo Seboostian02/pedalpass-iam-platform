@@ -130,7 +130,7 @@ export default function ProfilePage() {
         description="Manage your account information"
       />
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid items-start gap-6 md:grid-cols-2">
         {/* Edit Profile */}
         <Card className="overflow-hidden">
           <CardHeader

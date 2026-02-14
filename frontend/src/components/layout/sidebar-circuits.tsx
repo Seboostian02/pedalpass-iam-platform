@@ -9,190 +9,307 @@ export function SidebarCircuits() {
         preserveAspectRatio="xMinYMin slice"
       >
         <defs>
-          {/* Neon glow filter */}
-          <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+          {/* Neon glow filter — layered blur for organic neon look */}
+          <filter id="vein-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur1" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur2" />
             <feMerge>
-              <feMergeNode in="blur" />
+              <feMergeNode in="blur2" />
+              <feMergeNode in="blur1" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+
+          {/* Sweeping gradient — uniform flow top to bottom, lavender → pink → purple */}
+          <linearGradient id="vein-sweep" x1="0" y1="0" x2="0" y2="600" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#e0a3ff" stopOpacity="0" />
+            <stop offset="25%" stopColor="#e0a3ff" stopOpacity="0.5" />
+            <stop offset="50%" stopColor="#ff69b4" stopOpacity="0.7" />
+            <stop offset="75%" stopColor="#9370db" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#9370db" stopOpacity="0" />
+            <animateTransform
+              attributeName="gradientTransform"
+              type="translate"
+              from="0 -600"
+              to="0 1600"
+              dur="12s"
+              repeatCount="indefinite"
+            />
+          </linearGradient>
         </defs>
 
-        {/* ===== MAIN TRUNK — left side, full height ===== */}
+        {/* ===== MAIN ARTERY — full height, organic wobble ===== */}
         <path
-          d="M 25 60 Q 28 130 24 200 Q 20 270 28 340 Q 35 410 24 480 Q 16 550 28 620 Q 36 690 24 760 Q 16 830 25 900 L 25 1000"
-          stroke="#7c3aed"
-          strokeWidth="1.5"
-          strokeOpacity="0.18"
-          strokeLinecap="round"
-          filter="url(#neon)"
-        />
-        {/* Main trunk — animated pulse */}
-        <path
-          d="M 25 60 Q 28 130 24 200 Q 20 270 28 340 Q 35 410 24 480 Q 16 550 28 620 Q 36 690 24 760 Q 16 830 25 900 L 25 1000"
-          stroke="#a855f7"
-          strokeWidth="2.5"
-          strokeOpacity="0.5"
-          strokeLinecap="round"
-          strokeDasharray="60 140"
-          filter="url(#neon)"
-          style={{ animation: 'vein-flow-200 6s linear infinite' }}
-        />
-
-        {/* ===== SECONDARY TRUNK — mid-left ===== */}
-        <path
-          d="M 75 140 Q 72 210 78 280 Q 84 350 74 420 Q 66 490 78 560"
-          stroke="#7c3aed"
-          strokeWidth="1"
-          strokeOpacity="0.14"
-          strokeLinecap="round"
-          filter="url(#neon)"
-        />
-        <path
-          d="M 75 140 Q 72 210 78 280 Q 84 350 74 420 Q 66 490 78 560"
-          stroke="#a855f7"
+          d="M 65 0 C 68 60, 58 130, 62 200 C 66 270, 52 350, 58 430 C 64 510, 48 590, 54 670 C 60 750, 44 830, 50 910 C 54 950, 48 980, 50 1000"
+          stroke="#9370db"
           strokeWidth="2"
-          strokeOpacity="0.4"
+          strokeOpacity="0.08"
           strokeLinecap="round"
-          strokeDasharray="40 160"
-          filter="url(#neon)"
-          style={{ animation: 'vein-flow-200 8s linear infinite' }}
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 65 0 C 68 60, 58 130, 62 200 C 66 270, 52 350, 58 430 C 64 510, 48 590, 54 670 C 60 750, 44 830, 50 910 C 54 950, 48 980, 50 1000"
+          stroke="url(#vein-sweep)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
         />
 
-        {/* ===== RIGHT TRUNK — further right ===== */}
+        {/* ===== BRANCH 1 — from main at y~100, curves right ===== */}
         <path
-          d="M 150 220 Q 146 290 152 360 Q 158 430 148 500"
-          stroke="#7c3aed"
-          strokeWidth="0.8"
-          strokeOpacity="0.1"
-          strokeLinecap="round"
-          filter="url(#neon)"
-        />
-        <path
-          d="M 150 220 Q 146 290 152 360 Q 158 430 148 500"
-          stroke="#a855f7"
-          strokeWidth="1.5"
-          strokeOpacity="0.35"
-          strokeLinecap="round"
-          strokeDasharray="30 170"
-          filter="url(#neon)"
-          style={{ animation: 'vein-flow-200 10s linear infinite' }}
-        />
-
-        {/* ===== FAR TRUNK — right edge, subtle ===== */}
-        <path
-          d="M 200 300 Q 196 380 202 460 Q 208 540 198 620"
-          stroke="#7c3aed"
-          strokeWidth="0.6"
+          d="M 64 100 C 82 94, 104 108, 125 100 C 142 94, 158 104, 172 96"
+          stroke="#9370db"
+          strokeWidth="1.4"
           strokeOpacity="0.07"
           strokeLinecap="round"
-          filter="url(#neon)"
+          filter="url(#vein-glow)"
         />
         <path
-          d="M 200 300 Q 196 380 202 460 Q 208 540 198 620"
-          stroke="#a855f7"
-          strokeWidth="1.2"
-          strokeOpacity="0.25"
+          d="M 64 100 C 82 94, 104 108, 125 100 C 142 94, 158 104, 172 96"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.8"
           strokeLinecap="round"
-          strokeDasharray="25 175"
-          filter="url(#neon)"
-          style={{ animation: 'vein-flow-200 12s linear infinite' }}
+          filter="url(#vein-glow)"
         />
 
-        {/* ===== HORIZONTAL BRANCHES (connecting trunks) ===== */}
+        {/* Sub-branch 1a — from branch 1 midpoint, up-right */}
+        <path
+          d="M 125 100 C 132 86, 142 76, 152 68"
+          stroke="#9370db"
+          strokeWidth="0.9"
+          strokeOpacity="0.06"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 125 100 C 132 86, 142 76, 152 68"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* Main → Secondary at y≈160 */}
-        <path d="M 25 160 C 40 158 55 164 75 160" stroke="#7c3aed" strokeWidth="1" strokeOpacity="0.15" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 25 160 C 40 158 55 164 75 160" stroke="#a855f7" strokeWidth="1.8" strokeOpacity="0.45" strokeLinecap="round" strokeDasharray="15 85" filter="url(#neon)" style={{ animation: 'vein-flow-100 4s linear infinite' }} />
+        {/* Sub-branch 1b — from branch 1 tip */}
+        <path
+          d="M 172 96 C 182 104, 192 100, 200 108"
+          stroke="#9370db"
+          strokeWidth="0.7"
+          strokeOpacity="0.05"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 172 96 C 182 104, 192 100, 200 108"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* Main → Secondary at y≈320 */}
-        <path d="M 28 320 C 42 318 58 324 75 320" stroke="#7c3aed" strokeWidth="1" strokeOpacity="0.15" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 28 320 C 42 318 58 324 75 320" stroke="#a855f7" strokeWidth="1.8" strokeOpacity="0.45" strokeLinecap="round" strokeDasharray="12 88" filter="url(#neon)" style={{ animation: 'vein-flow-100 5s linear infinite' }} />
+        {/* ===== BRANCH 2 — from main at y~220, curves left ===== */}
+        <path
+          d="M 60 220 C 46 214, 32 224, 18 216 C 10 212, 4 206, 2 198"
+          stroke="#9370db"
+          strokeWidth="1.2"
+          strokeOpacity="0.07"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 60 220 C 46 214, 32 224, 18 216 C 10 212, 4 206, 2 198"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* Main → Secondary at y≈480 */}
-        <path d="M 24 480 C 38 478 56 484 75 480" stroke="#7c3aed" strokeWidth="0.8" strokeOpacity="0.12" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 24 480 C 38 478 56 484 75 480" stroke="#a855f7" strokeWidth="1.5" strokeOpacity="0.4" strokeLinecap="round" strokeDasharray="18 82" filter="url(#neon)" style={{ animation: 'vein-flow-100 6s linear infinite' }} />
+        {/* ===== BRANCH 3 — from main at y~340, long right branch ===== */}
+        <path
+          d="M 58 340 C 78 334, 100 346, 122 338 C 142 332, 162 344, 180 336 C 195 330, 208 338, 218 332"
+          stroke="#9370db"
+          strokeWidth="1.3"
+          strokeOpacity="0.07"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 58 340 C 78 334, 100 346, 122 338 C 142 332, 162 344, 180 336 C 195 330, 208 338, 218 332"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* Secondary → Right at y≈250 */}
-        <path d="M 78 250 C 100 248 120 254 150 250" stroke="#7c3aed" strokeWidth="0.8" strokeOpacity="0.1" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 78 250 C 100 248 120 254 150 250" stroke="#a855f7" strokeWidth="1.5" strokeOpacity="0.35" strokeLinecap="round" strokeDasharray="20 80" filter="url(#neon)" style={{ animation: 'vein-flow-100 5s linear infinite' }} />
+        {/* Sub-branch 3a — from branch 3 midpoint, down */}
+        <path
+          d="M 122 338 C 130 354, 140 368, 148 380"
+          stroke="#9370db"
+          strokeWidth="0.8"
+          strokeOpacity="0.06"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 122 338 C 130 354, 140 368, 148 380"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* Secondary → Right at y≈400 */}
-        <path d="M 74 400 C 95 398 118 404 150 400" stroke="#7c3aed" strokeWidth="0.8" strokeOpacity="0.1" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 74 400 C 95 398 118 404 150 400" stroke="#a855f7" strokeWidth="1.5" strokeOpacity="0.35" strokeLinecap="round" strokeDasharray="15 85" filter="url(#neon)" style={{ animation: 'vein-flow-100 7s linear infinite' }} />
+        {/* Sub-branch 3b — from branch 3 at three-quarter, up */}
+        <path
+          d="M 180 336 C 188 322, 196 314, 204 306"
+          stroke="#9370db"
+          strokeWidth="0.7"
+          strokeOpacity="0.05"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 180 336 C 188 322, 196 314, 204 306"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* Right → Far at y≈350 */}
-        <path d="M 152 350 C 168 348 182 354 200 350" stroke="#7c3aed" strokeWidth="0.6" strokeOpacity="0.08" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 152 350 C 168 348 182 354 200 350" stroke="#a855f7" strokeWidth="1.2" strokeOpacity="0.3" strokeLinecap="round" strokeDasharray="12 88" filter="url(#neon)" style={{ animation: 'vein-flow-100 6s linear infinite' }} />
+        {/* ===== BRANCH 4 — from main at y~500, goes right ===== */}
+        <path
+          d="M 60 500 C 80 494, 102 506, 124 498 C 142 492, 158 502, 170 496"
+          stroke="#9370db"
+          strokeWidth="1.2"
+          strokeOpacity="0.07"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 60 500 C 80 494, 102 506, 124 498 C 142 492, 158 502, 170 496"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* Right → Far at y≈480 */}
-        <path d="M 148 480 C 165 478 180 484 200 480" stroke="#7c3aed" strokeWidth="0.6" strokeOpacity="0.08" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 148 480 C 165 478 180 484 200 480" stroke="#a855f7" strokeWidth="1.2" strokeOpacity="0.25" strokeLinecap="round" strokeDasharray="10 90" filter="url(#neon)" style={{ animation: 'vein-flow-100 8s linear infinite' }} />
+        {/* Sub-branch 4a — from branch 4 midpoint, down */}
+        <path
+          d="M 124 498 C 132 514, 142 526, 150 538"
+          stroke="#9370db"
+          strokeWidth="0.8"
+          strokeOpacity="0.05"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 124 498 C 132 514, 142 526, 150 538"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* ===== SHORT STUBS (capillary branches) ===== */}
-        <path d="M 25 240 C 34 238 42 242 52 240" stroke="#7c3aed" strokeWidth="0.7" strokeOpacity="0.1" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 28 560 C 38 558 46 562 56 560" stroke="#7c3aed" strokeWidth="0.7" strokeOpacity="0.1" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 24 700 C 34 698 44 702 55 700" stroke="#7c3aed" strokeWidth="0.6" strokeOpacity="0.08" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 25 840 C 35 838 44 842 54 840" stroke="#7c3aed" strokeWidth="0.6" strokeOpacity="0.08" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 78 350 C 86 348 92 352 100 350" stroke="#7c3aed" strokeWidth="0.5" strokeOpacity="0.08" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 152 300 C 162 298 170 302 182 300" stroke="#7c3aed" strokeWidth="0.5" strokeOpacity="0.07" strokeLinecap="round" filter="url(#neon)" />
-        <path d="M 148 450 C 158 448 168 452 180 450" stroke="#7c3aed" strokeWidth="0.5" strokeOpacity="0.07" strokeLinecap="round" filter="url(#neon)" />
+        {/* ===== BRANCH 5 — from main at y~640, curves left ===== */}
+        <path
+          d="M 54 640 C 40 634, 26 644, 14 636 C 6 632, 2 624, 0 616"
+          stroke="#9370db"
+          strokeWidth="1"
+          strokeOpacity="0.06"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 54 640 C 40 634, 26 644, 14 636 C 6 632, 2 624, 0 616"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* ===== JUNCTION NODES (pulsing dots at intersections) ===== */}
+        {/* ===== BRANCH 6 — from main at y~760, goes right ===== */}
+        <path
+          d="M 52 760 C 70 754, 90 764, 110 756 C 126 750, 140 758, 150 752"
+          stroke="#9370db"
+          strokeWidth="1.1"
+          strokeOpacity="0.06"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 52 760 C 70 754, 90 764, 110 756 C 126 750, 140 758, 150 752"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
 
-        {/* Main trunk junctions */}
-        <circle cx="25" cy="160" r="2.5" fill="#7c3aed" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.15;0.45;0.15" dur="4s" repeatCount="indefinite" />
+        {/* ===== BRANCH 7 — from main at y~870, small left ===== */}
+        <path
+          d="M 52 870 C 38 864, 24 874, 12 866"
+          stroke="#9370db"
+          strokeWidth="0.8"
+          strokeOpacity="0.05"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+        <path
+          d="M 52 870 C 38 864, 24 874, 12 866"
+          stroke="url(#vein-sweep)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          filter="url(#vein-glow)"
+        />
+
+        {/* ===== CAPILLARY STUBS — very thin, organic endings ===== */}
+        <path d="M 152 68 C 158 60, 162 54, 164 46" stroke="#e0a3ff" strokeWidth="0.5" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 200 108 C 206 114, 214 112, 220 118" stroke="#e0a3ff" strokeWidth="0.5" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 2 198 C 0 190, 2 184, 6 176" stroke="#e0a3ff" strokeWidth="0.5" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 218 332 C 224 326, 228 320, 230 312" stroke="#e0a3ff" strokeWidth="0.4" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 148 380 C 154 390, 158 398, 160 406" stroke="#e0a3ff" strokeWidth="0.4" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 204 306 C 210 298, 214 292, 216 284" stroke="#e0a3ff" strokeWidth="0.4" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 170 496 C 180 490, 188 494, 196 488" stroke="#e0a3ff" strokeWidth="0.4" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 150 538 C 156 548, 160 556, 162 564" stroke="#e0a3ff" strokeWidth="0.4" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 0 616 C 0 608, 2 600, 6 592" stroke="#e0a3ff" strokeWidth="0.4" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 150 752 C 160 748, 168 752, 176 746" stroke="#e0a3ff" strokeWidth="0.4" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+        <path d="M 12 866 C 4 860, 0 854, 0 846" stroke="#e0a3ff" strokeWidth="0.4" strokeOpacity="0.04" strokeLinecap="round" filter="url(#vein-glow)" />
+
+        {/* ===== JUNCTION NODES — pulsing dots at branch points ===== */}
+
+        {/* Main artery branch points */}
+        <circle cx="64" cy="100" r="2.5" fill="#e0a3ff" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.08;0.3;0.08" dur="4s" repeatCount="indefinite" />
         </circle>
-        <circle cx="28" cy="320" r="2.5" fill="#7c3aed" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.15;0.45;0.15" dur="5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="24" cy="480" r="2" fill="#7c3aed" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.12;0.4;0.12" dur="6s" repeatCount="indefinite" />
-        </circle>
-
-        {/* Secondary trunk junctions */}
-        <circle cx="75" cy="160" r="2" fill="#a855f7" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.12;0.38;0.12" dur="4.5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="78" cy="250" r="2" fill="#a855f7" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.1;0.35;0.1" dur="5.5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="75" cy="320" r="2" fill="#a855f7" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.1;0.35;0.1" dur="6s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="74" cy="400" r="1.5" fill="#a855f7" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.08;0.3;0.08" dur="7s" repeatCount="indefinite" />
-        </circle>
-
-        {/* Right trunk junctions */}
-        <circle cx="150" cy="250" r="1.5" fill="#a855f7" filter="url(#neon)">
+        <circle cx="60" cy="220" r="2.5" fill="#e0a3ff" filter="url(#vein-glow)">
           <animate attributeName="opacity" values="0.08;0.3;0.08" dur="5s" repeatCount="indefinite" />
         </circle>
-        <circle cx="150" cy="400" r="1.5" fill="#a855f7" filter="url(#neon)">
+        <circle cx="58" cy="340" r="2.5" fill="#e0a3ff" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.08;0.3;0.08" dur="4.5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="60" cy="500" r="2" fill="#e0a3ff" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.06;0.25;0.06" dur="5.5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="54" cy="640" r="2" fill="#e0a3ff" filter="url(#vein-glow)">
           <animate attributeName="opacity" values="0.06;0.25;0.06" dur="6s" repeatCount="indefinite" />
         </circle>
-        <circle cx="152" cy="350" r="1.5" fill="#a855f7" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.06;0.22;0.06" dur="7s" repeatCount="indefinite" />
+        <circle cx="52" cy="760" r="2" fill="#e0a3ff" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.05;0.22;0.05" dur="5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="52" cy="870" r="1.5" fill="#e0a3ff" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.05;0.2;0.05" dur="6.5s" repeatCount="indefinite" />
         </circle>
 
-        {/* Far trunk junctions */}
-        <circle cx="200" cy="350" r="1" fill="#a855f7" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.05;0.2;0.05" dur="5.5s" repeatCount="indefinite" />
+        {/* Sub-branch junction nodes */}
+        <circle cx="125" cy="100" r="1.5" fill="#ff69b4" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.05;0.2;0.05" dur="4.5s" repeatCount="indefinite" />
         </circle>
-        <circle cx="200" cy="480" r="1" fill="#a855f7" filter="url(#neon)">
-          <animate attributeName="opacity" values="0.05;0.18;0.05" dur="6.5s" repeatCount="indefinite" />
+        <circle cx="122" cy="338" r="1.5" fill="#ff69b4" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.05;0.2;0.05" dur="5s" repeatCount="indefinite" />
         </circle>
-
-        {/* End-of-stub nodes */}
-        <circle cx="52" cy="240" r="1.2" fill="#7c3aed" opacity="0.1" filter="url(#neon)" />
-        <circle cx="56" cy="560" r="1.2" fill="#7c3aed" opacity="0.1" filter="url(#neon)" />
-        <circle cx="55" cy="700" r="1" fill="#7c3aed" opacity="0.08" filter="url(#neon)" />
-        <circle cx="54" cy="840" r="1" fill="#7c3aed" opacity="0.08" filter="url(#neon)" />
-        <circle cx="100" cy="350" r="1" fill="#a855f7" opacity="0.07" filter="url(#neon)" />
-        <circle cx="182" cy="300" r="1" fill="#a855f7" opacity="0.06" filter="url(#neon)" />
-        <circle cx="180" cy="450" r="1" fill="#a855f7" opacity="0.06" filter="url(#neon)" />
+        <circle cx="180" cy="336" r="1.5" fill="#ff69b4" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.04;0.18;0.04" dur="5.5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="124" cy="498" r="1.5" fill="#ff69b4" filter="url(#vein-glow)">
+          <animate attributeName="opacity" values="0.04;0.18;0.04" dur="6s" repeatCount="indefinite" />
+        </circle>
       </svg>
     </div>
   );
