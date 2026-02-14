@@ -1,6 +1,7 @@
 package com.iam.audit.controller;
 
 import com.iam.audit.dto.*;
+import com.iam.audit.model.AlertStatus;
 import com.iam.audit.model.SecurityAlert;
 import com.iam.audit.model.SeverityLevel;
 import com.iam.audit.service.AuditService;
@@ -17,6 +18,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -28,6 +32,22 @@ public class AuditController {
 
     public AuditController(AuditService auditService) {
         this.auditService = auditService;
+    }
+
+    @GetMapping("/filters")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SECURITY_OFFICER') or hasAuthority('audit:read')")
+    @Operation(summary = "Get audit filter options", description = "Retrieve available severity levels and alert statuses")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Filter options retrieved")
+    })
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getFilterOptions() {
+        List<String> severityLevels = Arrays.stream(SeverityLevel.values()).map(Enum::name).toList();
+        List<String> alertStatuses = Arrays.stream(AlertStatus.values()).map(Enum::name).toList();
+        Map<String, Object> filters = Map.of(
+                "severityLevels", severityLevels,
+                "alertStatuses", alertStatuses
+        );
+        return ResponseEntity.ok(ApiResponse.success("Filter options retrieved", filters));
     }
 
     @GetMapping("/logs")

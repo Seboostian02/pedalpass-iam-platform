@@ -8,18 +8,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCreateResource } from '@/hooks/use-resources';
-import { RESOURCE_TYPES, RESOURCE_CATEGORIES } from '@/lib/constants';
+import { useCreateResource, useResourceFilterOptions } from '@/hooks/use-resources';
+import type { ResourceType, ResourceCategory } from '@/types/resource';
 import { Plus } from 'lucide-react';
 
 const createResourceSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
-  resourceType: z.enum(['PHYSICAL', 'DIGITAL'] as const),
-  resourceCategory: z.enum([
-    'OFFICE', 'MEETING_ROOM', 'PARKING', 'EQUIPMENT',
-    'APPLICATION', 'FILE_SHARE', 'VPN', 'DATABASE',
-  ] as const),
+  resourceType: z.string().min(1, 'Type is required'),
+  resourceCategory: z.string().min(1, 'Category is required'),
   location: z.string().optional(),
   capacity: z.string().optional().refine(
     (val) => !val || (Number.isInteger(Number(val)) && Number(val) > 0),
@@ -37,14 +34,15 @@ interface CreateResourceDialogProps {
 
 export function CreateResourceDialog({ open, onClose }: CreateResourceDialogProps) {
   const createResource = useCreateResource();
+  const { data: filterOptions } = useResourceFilterOptions();
 
   const form = useForm<CreateResourceForm>({
     resolver: zodResolver(createResourceSchema),
     defaultValues: {
       name: '',
       description: '',
-      resourceType: 'DIGITAL',
-      resourceCategory: 'APPLICATION',
+      resourceType: '',
+      resourceCategory: '',
       location: '',
       capacity: '',
       requiresApproval: true,
@@ -56,10 +54,13 @@ export function CreateResourceDialog({ open, onClose }: CreateResourceDialogProp
   const onSubmit = (values: CreateResourceForm) => {
     console.log('[CreateResourceDialog] Submitting:', values);
     const request = {
-      ...values,
+      name: values.name,
+      resourceType: values.resourceType as ResourceType,
+      resourceCategory: values.resourceCategory as ResourceCategory,
       description: values.description || undefined,
       location: values.location || undefined,
       capacity: values.capacity ? Number(values.capacity) : undefined,
+      requiresApproval: values.requiresApproval,
     };
     createResource.mutate(request, {
       onSuccess: () => {
@@ -125,7 +126,7 @@ export function CreateResourceDialog({ open, onClose }: CreateResourceDialogProp
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {RESOURCE_TYPES.map((type) => (
+                        {(filterOptions?.types ?? []).map((type: string) => (
                           <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
                       </SelectContent>
@@ -148,7 +149,7 @@ export function CreateResourceDialog({ open, onClose }: CreateResourceDialogProp
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {RESOURCE_CATEGORIES.map((cat) => (
+                        {(filterOptions?.categories ?? []).map((cat: string) => (
                           <SelectItem key={cat} value={cat}>{cat.replace('_', ' ')}</SelectItem>
                         ))}
                       </SelectContent>

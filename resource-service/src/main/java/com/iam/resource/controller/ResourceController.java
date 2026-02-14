@@ -41,9 +41,11 @@ public class ResourceController {
             @RequestParam(required = false) ResourceType type) {
         List<ResourceType> types = resourceService.getDistinctTypes();
         List<ResourceCategory> categories = resourceService.getDistinctCategories(type);
+        List<String> accessLevels = List.of("READ", "WRITE", "ADMIN");
         Map<String, Object> filters = Map.of(
                 "types", types,
-                "categories", categories
+                "categories", categories,
+                "accessLevels", accessLevels
         );
         return ResponseEntity.ok(com.iam.common.dto.ApiResponse.success("Filter options retrieved", filters));
     }

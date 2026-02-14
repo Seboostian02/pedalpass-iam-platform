@@ -72,4 +72,11 @@ export const auditService = {
     if (!data.success) throw new Error(data.message);
     return data.data!;
   },
+
+  getFilterOptions: async (): Promise<{ severityLevels: string[]; alertStatuses: string[] }> => {
+    console.log('[AuditService] Fetching filter options');
+    const { data } = await apiClient.get<ApiResponse<{ severityLevels: string[]; alertStatuses: string[] }>>('/api/v1/audit/filters');
+    if (!data.success) throw new Error(data.message);
+    return data.data!;
+  },
 };

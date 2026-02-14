@@ -56,10 +56,10 @@ export const resourceService = {
     console.log('[ResourceService] Resource deactivated:', id);
   },
 
-  getFilterOptions: async (type?: string): Promise<{ types: string[]; categories: string[] }> => {
+  getFilterOptions: async (type?: string): Promise<{ types: string[]; categories: string[]; accessLevels: string[] }> => {
     console.log('[ResourceService] Fetching filter options, type:', type);
     const params = type ? { type } : {};
-    const { data } = await apiClient.get<ApiResponse<{ types: string[]; categories: string[] }>>('/api/v1/resources/filters', { params });
+    const { data } = await apiClient.get<ApiResponse<{ types: string[]; categories: string[]; accessLevels: string[] }>>('/api/v1/resources/filters', { params });
     if (!data.success) throw new Error(data.message);
     return data.data!;
   },

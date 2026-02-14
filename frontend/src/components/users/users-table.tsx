@@ -14,7 +14,7 @@ import { DataTablePagination } from '@/components/shared/data-table-pagination';
 import { LoadingSpinner } from '@/components/shared/loading-spinner';
 import { EmptyState } from '@/components/shared/empty-state';
 import { useUsers } from '@/hooks/use-users';
-import { ROLES } from '@/lib/constants';
+import { useRoles } from '@/hooks/use-roles';
 import type { UserResponse } from '@/types/user';
 import { Users, Search, X } from 'lucide-react';
 import { format } from 'date-fns';
@@ -92,6 +92,7 @@ export function UsersTable({ onRowClick }: UsersTableProps) {
   const [roleFilter, setRoleFilter] = useState<string>('all');
 
   const { data, isLoading } = useUsers({ page, size });
+  const { data: roles } = useRoles();
 
   console.log('[UsersTable] Rendering, page:', page, 'size:', size, 'total:', data?.totalElements);
 
@@ -141,8 +142,8 @@ export function UsersTable({ onRowClick }: UsersTableProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
-            {Object.values(ROLES).map((role) => (
-              <SelectItem key={role} value={role}>{role}</SelectItem>
+            {(roles ?? []).map((role) => (
+              <SelectItem key={role.name} value={role.name}>{role.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>

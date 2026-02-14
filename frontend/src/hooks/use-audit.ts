@@ -42,6 +42,13 @@ export function useAuditLogsByRange(start: string, end: string, params: Paginati
   });
 }
 
+export function useAuditFilters() {
+  return useQuery({
+    queryKey: ['audit-filters'],
+    queryFn: () => auditService.getFilterOptions(),
+  });
+}
+
 export function useAlerts(params: PaginationParams = {}) {
   return useQuery({
     queryKey: ['alerts', params],

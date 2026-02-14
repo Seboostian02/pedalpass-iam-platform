@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateAccessRequest } from '@/hooks/use-access-requests';
+import { useResourceFilterOptions } from '@/hooks/use-resources';
 import type { ResourceResponse } from '@/types/resource';
 import { KeyRound } from 'lucide-react';
 
@@ -28,6 +29,7 @@ interface RequestAccessDialogProps {
 
 export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDialogProps) {
   const createRequest = useCreateAccessRequest();
+  const { data: filterOptions } = useResourceFilterOptions();
   const isPhysical = resource?.resourceType === 'PHYSICAL';
 
   const form = useForm<RequestAccessForm>({
@@ -107,9 +109,11 @@ export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDi
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="READ">Read</SelectItem>
-                        <SelectItem value="WRITE">Write</SelectItem>
-                        <SelectItem value="ADMIN">Admin</SelectItem>
+                        {(filterOptions?.accessLevels ?? []).map((level: string) => (
+                          <SelectItem key={level} value={level}>
+                            {level.charAt(0) + level.slice(1).toLowerCase()}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

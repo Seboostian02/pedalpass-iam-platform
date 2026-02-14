@@ -11,8 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAuditLogs, useAlerts } from '@/hooks/use-audit';
-import { SEVERITY_LEVELS } from '@/lib/constants';
+import { useAuditLogs, useAlerts, useAuditFilters } from '@/hooks/use-audit';
 import type { SecurityAlertResponse } from '@/types/audit';
 import { ScrollText, ShieldAlert, Search, X, ShieldCheck, ShieldOff } from 'lucide-react';
 import { format } from 'date-fns';
@@ -41,6 +40,7 @@ export default function AuditPage() {
 
   const logsQuery = useAuditLogs({ page: logsPage, size: logsSize });
   const alertsQuery = useAlerts({ page: alertsPage, size: alertsSize });
+  const { data: auditFilters } = useAuditFilters();
 
   console.log('[AuditPage] Rendering, logs:', logsQuery.data?.totalElements,
     'alerts:', alertsQuery.data?.totalElements);
@@ -108,7 +108,7 @@ export default function AuditPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Severity</SelectItem>
-                {SEVERITY_LEVELS.map((level) => (
+                {(auditFilters?.severityLevels ?? []).map((level: string) => (
                   <SelectItem key={level} value={level}>{level}</SelectItem>
                 ))}
               </SelectContent>
