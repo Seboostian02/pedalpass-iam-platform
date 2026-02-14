@@ -59,9 +59,9 @@ if ($RebuildAll) {
 
 # ============== START INFRASTRUCTURE ==============
 Write-Host ""
-Write-Host "[3/4] Starting infrastructure (PostgreSQL, RabbitMQ, Redis, MailHog, pgAdmin)..." -ForegroundColor Yellow
+Write-Host "[3/4] Starting infrastructure (PostgreSQL, RabbitMQ, Redis, Mailpit, pgAdmin)..." -ForegroundColor Yellow
 
-docker compose --env-file .env up -d postgres rabbitmq redis mailhog pgadmin
+docker compose --env-file .env up -d postgres rabbitmq redis mailpit pgadmin
 
 Write-Host "  Waiting for infrastructure to be healthy..."
 
@@ -130,7 +130,7 @@ if ($InfraOnly) {
         @{ Name = "PostgreSQL";    Container = "iam-postgres";   Port = "5432" },
         @{ Name = "RabbitMQ";      Container = "iam-rabbitmq";   Port = "5672/15672" },
         @{ Name = "Redis";         Container = "iam-redis";      Port = "6379" },
-        @{ Name = "MailHog";       Container = "iam-mailhog";    Port = "1025/8025" },
+        @{ Name = "Mailpit";       Container = "iam-mailpit";    Port = "1025/8025" },
         @{ Name = "pgAdmin4";      Container = "iam-pgadmin";    Port = "5050" }
     )
 } else {
@@ -138,7 +138,7 @@ if ($InfraOnly) {
         @{ Name = "PostgreSQL";    Container = "iam-postgres";              Port = "5432" },
         @{ Name = "RabbitMQ";      Container = "iam-rabbitmq";              Port = "5672/15672" },
         @{ Name = "Redis";         Container = "iam-redis";                 Port = "6379" },
-        @{ Name = "MailHog";       Container = "iam-mailhog";               Port = "1025/8025" },
+        @{ Name = "Mailpit";       Container = "iam-mailpit";               Port = "1025/8025" },
         @{ Name = "pgAdmin4";      Container = "iam-pgadmin";               Port = "5050" },
         @{ Name = "Auth Service";  Container = "iam-auth-service";          Port = "8081" },
         @{ Name = "User Service";  Container = "iam-user-service";          Port = "8082" },
@@ -173,7 +173,7 @@ if ($InfraOnly) {
     Write-Host "Infrastructure URLs:" -ForegroundColor Cyan
     Write-Host "  pgAdmin4:        http://localhost:5050   (credentials in .env)" -ForegroundColor White
     Write-Host "  RabbitMQ UI:     http://localhost:15672  (credentials in .env)" -ForegroundColor White
-    Write-Host "  MailHog UI:      http://localhost:8025" -ForegroundColor White
+    Write-Host "  Mailpit UI:      http://localhost:8025" -ForegroundColor White
     Write-Host ""
     Write-Host "To run services locally:" -ForegroundColor Cyan
     Write-Host "  mvn clean compile" -ForegroundColor White
@@ -190,7 +190,7 @@ if ($InfraOnly) {
     Write-Host "  Swagger UI:      http://localhost:8090/swagger-ui.html  (all services dropdown)" -ForegroundColor White
     Write-Host "  pgAdmin4:        http://localhost:5050                  (credentials in .env)" -ForegroundColor White
     Write-Host "  RabbitMQ UI:     http://localhost:15672                 (credentials in .env)" -ForegroundColor White
-    Write-Host "  MailHog UI:      http://localhost:8025                  (persistent emails)" -ForegroundColor White
+    Write-Host "  Mailpit UI:      http://localhost:8025                  (persistent emails)" -ForegroundColor White
     Write-Host ""
     Write-Host "Swagger per service:" -ForegroundColor Cyan
     Write-Host "  Auth Service:         http://localhost:8081/swagger-ui/index.html" -ForegroundColor White
