@@ -13,7 +13,7 @@ import { useMyRequests, usePendingRequests } from '@/hooks/use-access-requests';
 import { useAuth } from '@/context/auth-context';
 import { ROLES } from '@/lib/constants';
 import type { AccessRequestResponse } from '@/types/resource';
-import { Clock, ClipboardCheck, Eye } from 'lucide-react';
+import { Clock, ClipboardCheck, Eye, CalendarDays } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AccessRequestsPage() {
@@ -80,6 +80,7 @@ export default function AccessRequestsPage() {
                       <TableHead>Resource</TableHead>
                       <TableHead>Access Level</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Schedule</TableHead>
                       <TableHead>Submitted</TableHead>
                       <TableHead>Review Comment</TableHead>
                     </TableRow>
@@ -100,6 +101,19 @@ export default function AccessRequestsPage() {
                         </TableCell>
                         <TableCell>
                           <RequestStatusBadge status={req.status} />
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {req.scheduledStart && req.scheduledEnd ? (
+                            <div className="flex items-center gap-1.5">
+                              <CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary/70" />
+                              <div>
+                                <div>{format(new Date(req.scheduledStart), 'MMM dd, HH:mm')}</div>
+                                <div className="text-xs opacity-70">to {format(new Date(req.scheduledEnd), 'MMM dd, HH:mm')}</div>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground/50">—</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {format(new Date(req.createdAt), 'MMM dd, yyyy')}
@@ -144,6 +158,7 @@ export default function AccessRequestsPage() {
                         <TableHead>User</TableHead>
                         <TableHead>Resource</TableHead>
                         <TableHead>Access Level</TableHead>
+                        <TableHead>Schedule</TableHead>
                         <TableHead>Justification</TableHead>
                         <TableHead>Submitted</TableHead>
                         <TableHead className="text-right">Action</TableHead>
@@ -163,6 +178,19 @@ export default function AccessRequestsPage() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-xs">{req.accessLevel}</Badge>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {req.scheduledStart && req.scheduledEnd ? (
+                              <div className="flex items-center gap-1.5">
+                                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary/70" />
+                                <div>
+                                  <div>{format(new Date(req.scheduledStart), 'MMM dd, HH:mm')}</div>
+                                  <div className="text-xs opacity-70">to {format(new Date(req.scheduledEnd), 'MMM dd, HH:mm')}</div>
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground/50">—</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
                             {req.justification || '—'}

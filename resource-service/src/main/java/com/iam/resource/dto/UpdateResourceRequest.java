@@ -27,4 +27,7 @@ public class UpdateResourceRequest {
 
     @Schema(description = "Requires approval", example = "true")
     private Boolean requiresApproval;
+
+    @Schema(description = "Whether the resource is active", example = "true")
+    private Boolean active;
 }

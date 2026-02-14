@@ -24,4 +24,18 @@ public interface AccessRequestRepository extends JpaRepository<AccessRequest, UU
             "AND ar.scheduledStart < :end " +
             "AND ar.scheduledEnd > :start")
     List<AccessRequest> findOverlapping(UUID resourceId, LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT ar FROM AccessRequest ar WHERE ar.resource.id = :resourceId " +
+            "AND ar.status IN :statuses " +
+            "AND ar.scheduledStart < :end " +
+            "AND ar.scheduledEnd > :start")
+    List<AccessRequest> findByResourceIdAndStatusInAndDateRange(
+            UUID resourceId, List<RequestStatus> statuses, LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT ar FROM AccessRequest ar JOIN FETCH ar.resource " +
+            "WHERE ar.status IN :statuses " +
+            "AND ar.scheduledStart < :end " +
+            "AND ar.scheduledEnd > :start")
+    List<AccessRequest> findByStatusInAndDateRange(
+            List<RequestStatus> statuses, LocalDateTime start, LocalDateTime end);
 }

@@ -40,7 +40,7 @@ public class ResourceService {
     // Resource CRUD operations
 
     public Page<Resource> getAllResources(Pageable pageable) {
-        return resourceRepository.findByActiveTrue(pageable);
+        return resourceRepository.findAll(pageable);
     }
 
     public Resource getResourceById(UUID id) {
@@ -73,13 +73,30 @@ public class ResourceService {
     }
 
     @Transactional
-    public Resource updateResource(UUID id, Resource updatedResource) {
+    public Resource updateResource(UUID id, Resource updatedResource, Boolean active) {
         Resource resource = getResourceById(id);
         resource.setName(updatedResource.getName());
         resource.setDescription(updatedResource.getDescription());
         resource.setLocation(updatedResource.getLocation());
         resource.setCapacity(updatedResource.getCapacity());
         resource.setRequiresApproval(updatedResource.isRequiresApproval());
+
+        if (active != null && active != resource.isActive()) {
+            resource.setActive(active);
+            if (!active) {
+                List<AccessRequest> activeRequests = accessRequestRepository.findByResourceIdAndStatusIn(
+                        id, List.of(RequestStatus.PENDING, RequestStatus.APPROVED));
+                for (AccessRequest req : activeRequests) {
+                    req.setStatus(RequestStatus.REVOKED);
+                    req.setReviewComment("Resource deactivated");
+                }
+                accessRequestRepository.saveAll(activeRequests);
+                log.info("Resource {} deactivated via update, {} requests revoked", resource.getName(), activeRequests.size());
+            } else {
+                log.info("Resource {} reactivated", resource.getName());
+            }
+        }
+
         return resourceRepository.save(resource);
     }
 
@@ -119,6 +136,13 @@ public class ResourceService {
                 throw new IllegalArgumentException("End date must be after start date");
             }
             accessLevel = "RESERVE";
+
+            // Collision check: reject if overlapping APPROVED or PENDING reservation exists
+            List<AccessRequest> overlapping = accessRequestRepository.findByResourceIdAndStatusInAndDateRange(
+                    resourceId, List.of(RequestStatus.APPROVED, RequestStatus.PENDING), start, end);
+            if (!overlapping.isEmpty()) {
+                throw new IllegalArgumentException("Resource is already reserved during the selected time period");
+            }
         } else {
             if (accessLevel == null || accessLevel.isBlank()) {
                 throw new IllegalArgumentException("Access level is required for digital resources");
@@ -235,6 +259,16 @@ public class ResourceService {
 
     public Page<AccessRequest> getAccessRequestsByResource(UUID resourceId, Pageable pageable) {
         return accessRequestRepository.findByResourceId(resourceId, pageable);
+    }
+
+    public List<AccessRequest> getReservations(UUID resourceId, LocalDateTime from, LocalDateTime to) {
+        return accessRequestRepository.findByResourceIdAndStatusInAndDateRange(
+                resourceId, List.of(RequestStatus.APPROVED, RequestStatus.PENDING), from, to);
+    }
+
+    public List<AccessRequest> getAllReservations(LocalDateTime from, LocalDateTime to) {
+        return accessRequestRepository.findByStatusInAndDateRange(
+                List.of(RequestStatus.APPROVED, RequestStatus.PENDING), from, to);
     }
 
     public Page<AccessRequest> getAccessRequestsByStatus(RequestStatus status, Pageable pageable) {

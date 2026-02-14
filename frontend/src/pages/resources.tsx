@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { PageHeader } from '@/components/shared/page-header';
 import { DataTablePagination } from '@/components/shared/data-table-pagination';
 import { LoadingSpinner } from '@/components/shared/loading-spinner';
@@ -9,12 +9,13 @@ import { ResourceFilters } from '@/components/resources/resource-filters';
 import { CreateResourceDialog } from '@/components/resources/create-resource-dialog';
 import { EditResourceDialog } from '@/components/resources/edit-resource-dialog';
 import { RequestAccessDialog } from '@/components/resources/request-access-dialog';
+import { ResourceCalendarDialog } from '@/components/resources/resource-calendar-dialog';
 import { Button } from '@/components/ui/button';
 import { useResources } from '@/hooks/use-resources';
 import { useAuth } from '@/context/auth-context';
 import { ROLES } from '@/lib/constants';
 import type { ResourceResponse } from '@/types/resource';
-import { Plus, Server } from 'lucide-react';
+import { Plus, Server, CalendarDays } from 'lucide-react';
 
 export default function ResourcesPage() {
   const { hasAnyRole } = useAuth();
@@ -25,11 +26,26 @@ export default function ResourcesPage() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editResource, setEditResource] = useState<ResourceResponse | null>(null);
   const [requestResource, setRequestResource] = useState<ResourceResponse | null>(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [defaultStart, setDefaultStart] = useState<string | undefined>();
+  const [defaultEnd, setDefaultEnd] = useState<string | undefined>();
+
+  const handleCalendarSlotSelect = useCallback((start: Date, end: Date) => {
+    const toLocalDatetime = (d: Date) => {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+    setDefaultStart(toLocalDatetime(start));
+    setDefaultEnd(toLocalDatetime(end));
+    // Open request dialog without a pre-selected resource — user picks from dropdown
+    setRequestResource({} as ResourceResponse);
+  }, []);
 
   const { data, isLoading } = useResources({ page, size });
 
@@ -42,7 +58,8 @@ export default function ResourcesPage() {
       resource.description?.toLowerCase().includes(search.toLowerCase());
     const matchesType = typeFilter === 'all' || resource.resourceType === typeFilter;
     const matchesCategory = categoryFilter === 'all' || resource.resourceCategory === categoryFilter;
-    return matchesSearch && matchesType && matchesCategory;
+    const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' ? resource.active : !resource.active);
+    return matchesSearch && matchesType && matchesCategory && matchesStatus;
   });
 
   return (
@@ -50,12 +67,20 @@ export default function ResourcesPage() {
       <PageHeader
         title="Resources"
         description="Browse and request access to system resources"
-        action={canManage ? (
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Resource
-          </Button>
-        ) : undefined}
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setCalendarOpen(true)}>
+              <CalendarDays className="h-4 w-4 mr-2" />
+              Reservations
+            </Button>
+            {canManage && (
+              <Button onClick={() => setCreateOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Resource
+              </Button>
+            )}
+          </div>
+        }
       />
 
       <ResourceFilters
@@ -65,6 +90,8 @@ export default function ResourcesPage() {
         onTypeChange={setTypeFilter}
         categoryFilter={categoryFilter}
         onCategoryChange={setCategoryFilter}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
       />
@@ -75,7 +102,7 @@ export default function ResourcesPage() {
         <EmptyState
           icon={<Server className="h-12 w-12" />}
           title="No resources found"
-          description={search || typeFilter !== 'all' || categoryFilter !== 'all'
+          description={search || typeFilter !== 'all' || categoryFilter !== 'all' || statusFilter !== 'all'
             ? 'Try adjusting your filters'
             : 'No resources in the system yet'}
         />
@@ -85,7 +112,7 @@ export default function ResourcesPage() {
             <ResourceCard
               key={resource.id}
               resource={resource}
-              onRequestAccess={setRequestResource}
+              onRequestAccess={(r) => { setDefaultStart(undefined); setDefaultEnd(undefined); setRequestResource(r); }}
               onEdit={canManage ? setEditResource : undefined}
               canEdit={canManage}
             />
@@ -94,7 +121,7 @@ export default function ResourcesPage() {
       ) : (
         <ResourcesTable
           data={filteredContent}
-          onRequestAccess={setRequestResource}
+          onRequestAccess={(r) => { setDefaultStart(undefined); setDefaultEnd(undefined); setRequestResource(r); }}
           onEdit={canManage ? setEditResource : undefined}
           canEdit={canManage}
         />
@@ -113,7 +140,18 @@ export default function ResourcesPage() {
 
       <CreateResourceDialog open={createOpen} onClose={() => setCreateOpen(false)} />
       <EditResourceDialog resource={editResource} open={!!editResource} onClose={() => setEditResource(null)} />
-      <RequestAccessDialog resource={requestResource} open={!!requestResource} onClose={() => setRequestResource(null)} />
+      <RequestAccessDialog
+        resource={requestResource}
+        open={!!requestResource}
+        onClose={() => { setRequestResource(null); setDefaultStart(undefined); setDefaultEnd(undefined); }}
+        defaultStart={defaultStart}
+        defaultEnd={defaultEnd}
+      />
+      <ResourceCalendarDialog
+        open={calendarOpen}
+        onClose={() => setCalendarOpen(false)}
+        onSelectSlot={handleCalendarSlotSelect}
+      />
     </div>
   );
 }

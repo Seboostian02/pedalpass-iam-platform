@@ -11,6 +11,8 @@ interface ResourceFiltersProps {
   onTypeChange: (value: string) => void;
   categoryFilter: string;
   onCategoryChange: (value: string) => void;
+  statusFilter: string;
+  onStatusChange: (value: string) => void;
   viewMode: 'grid' | 'table';
   onViewModeChange: (mode: 'grid' | 'table') => void;
 }
@@ -19,6 +21,7 @@ export function ResourceFilters({
   search, onSearchChange,
   typeFilter, onTypeChange,
   categoryFilter, onCategoryChange,
+  statusFilter, onStatusChange,
   viewMode, onViewModeChange,
 }: ResourceFiltersProps) {
   const { data: allFilters } = useResourceFilterOptions();
@@ -81,20 +84,33 @@ export function ResourceFilters({
         </SelectContent>
       </Select>
 
+      <Select value={statusFilter} onValueChange={onStatusChange}>
+        <SelectTrigger className="w-[calc(50%-6px)] sm:w-[140px]">
+          <SelectValue placeholder="Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Status</SelectItem>
+          <SelectItem value="active">Active</SelectItem>
+          <SelectItem value="inactive">Inactive</SelectItem>
+        </SelectContent>
+      </Select>
+
       <div className="flex items-center gap-1 ml-auto">
         <Button
           variant={viewMode === 'grid' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onViewModeChange('grid')}
         >
-          <LayoutGrid className="h-4 w-4" />
+          <LayoutGrid className="h-4 w-4 mr-1" />
+          Grid
         </Button>
         <Button
           variant={viewMode === 'table' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onViewModeChange('table')}
         >
-          <Table2 className="h-4 w-4" />
+          <Table2 className="h-4 w-4 mr-1" />
+          Table
         </Button>
       </div>
     </div>

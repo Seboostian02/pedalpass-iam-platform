@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -147,7 +148,7 @@ public class ResourceController {
                 .requiresApproval(request.getRequiresApproval() != null ? request.getRequiresApproval() : true)
                 .build();
 
-        Resource updated = resourceService.updateResource(id, updatedFields);
+        Resource updated = resourceService.updateResource(id, updatedFields, request.getActive());
         return ResponseEntity.ok(com.iam.common.dto.ApiResponse.success("Resource updated", ResourceResponse.fromEntity(updated)));
     }
 
@@ -177,6 +178,40 @@ public class ResourceController {
         Page<AccessRequestResponse> response = resourceService.getAccessRequestsByResource(resourceId, pageable)
                 .map(AccessRequestResponse::fromEntity);
         return ResponseEntity.ok(com.iam.common.dto.ApiResponse.success("Access requests retrieved", response));
+    }
+
+    @GetMapping("/resources/{resourceId}/reservations")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get reservations for resource", description = "Retrieve approved and pending reservations within a date range (non-paginated)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Reservations retrieved"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Resource not found")
+    })
+    public ResponseEntity<com.iam.common.dto.ApiResponse<List<AccessRequestResponse>>> getReservations(
+            @PathVariable UUID resourceId,
+            @RequestParam String from,
+            @RequestParam String to) {
+        LocalDateTime fromDate = LocalDateTime.parse(from);
+        LocalDateTime toDate = LocalDateTime.parse(to);
+        List<AccessRequestResponse> response = resourceService.getReservations(resourceId, fromDate, toDate)
+                .stream().map(AccessRequestResponse::fromEntity).toList();
+        return ResponseEntity.ok(com.iam.common.dto.ApiResponse.success("Reservations retrieved", response));
+    }
+
+    @GetMapping("/resources/reservations")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get all reservations", description = "Retrieve approved and pending reservations across all resources within a date range")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Reservations retrieved")
+    })
+    public ResponseEntity<com.iam.common.dto.ApiResponse<List<AccessRequestResponse>>> getAllReservations(
+            @RequestParam String from,
+            @RequestParam String to) {
+        LocalDateTime fromDate = LocalDateTime.parse(from);
+        LocalDateTime toDate = LocalDateTime.parse(to);
+        List<AccessRequestResponse> response = resourceService.getAllReservations(fromDate, toDate)
+                .stream().map(AccessRequestResponse::fromEntity).toList();
+        return ResponseEntity.ok(com.iam.common.dto.ApiResponse.success("Reservations retrieved", response));
     }
 
     // Access Request endpoints

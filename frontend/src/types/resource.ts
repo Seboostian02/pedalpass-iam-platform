@@ -37,6 +37,7 @@ export interface UpdateResourceRequest {
   location?: string;
   capacity?: number;
   requiresApproval?: boolean;
+  active?: boolean;
 }
 
 export interface AccessRequestResponse {

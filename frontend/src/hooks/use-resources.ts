@@ -41,6 +41,22 @@ export function useResourceFilterOptions(type?: string) {
   });
 }
 
+export function useResourceReservations(resourceId: string, from: string, to: string) {
+  return useQuery({
+    queryKey: ['resources', resourceId, 'reservations', from, to],
+    queryFn: () => resourceService.getReservations(resourceId, from, to),
+    enabled: !!resourceId && !!from && !!to,
+  });
+}
+
+export function useAllReservations(from: string, to: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['reservations', 'all', from, to],
+    queryFn: () => resourceService.getAllReservations(from, to),
+    enabled: enabled && !!from && !!to,
+  });
+}
+
 export function useCreateResource() {
   const queryClient = useQueryClient();
   return useMutation({

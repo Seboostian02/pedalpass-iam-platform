@@ -64,6 +64,19 @@ export const resourceService = {
     return data.data!;
   },
 
+  getReservations: async (resourceId: string, from: string, to: string): Promise<AccessRequestResponse[]> => {
+    console.log('[ResourceService] Fetching reservations for resource:', resourceId, 'from:', from, 'to:', to);
+    const { data } = await apiClient.get<ApiResponse<AccessRequestResponse[]>>(`/api/v1/resources/${resourceId}/reservations`, { params: { from, to } });
+    if (!data.success) throw new Error(data.message);
+    return data.data!;
+  },
+
+  getAllReservations: async (from: string, to: string): Promise<AccessRequestResponse[]> => {
+    const { data } = await apiClient.get<ApiResponse<AccessRequestResponse[]>>('/api/v1/resources/reservations', { params: { from, to } });
+    if (!data.success) throw new Error(data.message);
+    return data.data!;
+  },
+
   getAccessRequestsByResource: async (resourceId: string, params: PaginationParams = {}): Promise<Page<AccessRequestResponse>> => {
     console.log('[ResourceService] Fetching access requests for resource:', resourceId);
     const { data } = await apiClient.get<ApiResponse<Page<AccessRequestResponse>>>(`/api/v1/resources/${resourceId}/access-requests`, { params });
@@ -83,9 +96,19 @@ export const accessRequestService = {
 
   createRequest: async (request: CreateAccessRequestRequest): Promise<AccessRequestResponse> => {
     console.log('[AccessRequestService] Creating access request for resource:', request.resourceId);
-    const { data } = await apiClient.post<ApiResponse<AccessRequestResponse>>('/api/v1/access-requests', request);
-    if (!data.success) throw new Error(data.message);
-    return data.data!;
+    try {
+      const { data } = await apiClient.post<ApiResponse<AccessRequestResponse>>('/api/v1/access-requests', request);
+      if (!data.success) throw new Error(data.message);
+      return data.data!;
+    } catch (error: unknown) {
+      if (error instanceof Error && 'response' in error) {
+        const axiosErr = error as { response?: { data?: { message?: string } } };
+        if (axiosErr.response?.data?.message) {
+          throw new Error(axiosErr.response.data.message);
+        }
+      }
+      throw error;
+    }
   },
 
   getRequestById: async (id: string): Promise<AccessRequestResponse> => {

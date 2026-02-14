@@ -21,6 +21,7 @@ const editResourceSchema = z.object({
     { message: 'Must be a positive integer' }
   ),
   requiresApproval: z.boolean(),
+  active: z.boolean(),
 });
 
 type EditResourceForm = z.infer<typeof editResourceSchema>;
@@ -42,6 +43,7 @@ export function EditResourceDialog({ resource, open, onClose }: EditResourceDial
       location: '',
       capacity: '',
       requiresApproval: true,
+      active: true,
     },
   });
 
@@ -54,6 +56,7 @@ export function EditResourceDialog({ resource, open, onClose }: EditResourceDial
         location: resource.location || '',
         capacity: resource.capacity ? String(resource.capacity) : '',
         requiresApproval: resource.requiresApproval,
+        active: resource.active,
       });
     }
   }, [resource, form]);
@@ -67,6 +70,7 @@ export function EditResourceDialog({ resource, open, onClose }: EditResourceDial
       location: values.location || undefined,
       capacity: values.capacity ? Number(values.capacity) : undefined,
       requiresApproval: values.requiresApproval,
+      active: values.active,
     };
     updateResource.mutate({ id: resource.id, request }, {
       onSuccess: () => {
@@ -155,6 +159,26 @@ export function EditResourceDialog({ resource, open, onClose }: EditResourceDial
                   <div>
                     <FormLabel className="text-sm font-medium">Requires Approval</FormLabel>
                     <p className="text-xs text-muted-foreground">Access requests need manual review</p>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="active"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div>
+                    <FormLabel className="text-sm font-medium">Active</FormLabel>
+                    <p className="text-xs text-muted-foreground">
+                      {field.value
+                        ? 'Resource is currently active'
+                        : 'Deactivating will revoke all pending and approved requests'}
+                    </p>
                   </div>
                   <FormControl>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
