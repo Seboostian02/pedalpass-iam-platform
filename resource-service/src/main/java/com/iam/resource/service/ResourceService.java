@@ -56,6 +56,17 @@ public class ResourceService {
         return resourceRepository.findByResourceCategoryAndActiveTrue(category, pageable);
     }
 
+    public List<ResourceType> getDistinctTypes() {
+        return resourceRepository.findDistinctResourceTypes();
+    }
+
+    public List<ResourceCategory> getDistinctCategories(ResourceType type) {
+        if (type != null) {
+            return resourceRepository.findDistinctCategoriesByType(type);
+        }
+        return resourceRepository.findDistinctCategories();
+    }
+
     @Transactional
     public Resource createResource(Resource resource) {
         return resourceRepository.save(resource);
@@ -98,6 +109,21 @@ public class ResourceService {
                                               String justification, String accessLevel,
                                               LocalDateTime start, LocalDateTime end) {
         Resource resource = getResourceById(resourceId);
+
+        // Validate based on resource type
+        if (resource.getResourceType() == ResourceType.PHYSICAL) {
+            if (start == null || end == null) {
+                throw new IllegalArgumentException("Start and end dates are required for physical resources");
+            }
+            if (!end.isAfter(start)) {
+                throw new IllegalArgumentException("End date must be after start date");
+            }
+            accessLevel = "RESERVE";
+        } else {
+            if (accessLevel == null || accessLevel.isBlank()) {
+                throw new IllegalArgumentException("Access level is required for digital resources");
+            }
+        }
 
         AccessRequest request = AccessRequest.builder()
                 .userId(userId)

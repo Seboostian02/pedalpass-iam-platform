@@ -34,6 +34,13 @@ export function useResourcesByCategory(category: ResourceCategory, params: Pagin
   });
 }
 
+export function useResourceFilterOptions(type?: string) {
+  return useQuery({
+    queryKey: ['resources', 'filters', type],
+    queryFn: () => resourceService.getFilterOptions(type === 'all' ? undefined : type),
+  });
+}
+
 export function useCreateResource() {
   const queryClient = useQueryClient();
   return useMutation({

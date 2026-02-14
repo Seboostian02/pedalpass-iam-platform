@@ -56,6 +56,14 @@ export const resourceService = {
     console.log('[ResourceService] Resource deactivated:', id);
   },
 
+  getFilterOptions: async (type?: string): Promise<{ types: string[]; categories: string[] }> => {
+    console.log('[ResourceService] Fetching filter options, type:', type);
+    const params = type ? { type } : {};
+    const { data } = await apiClient.get<ApiResponse<{ types: string[]; categories: string[] }>>('/api/v1/resources/filters', { params });
+    if (!data.success) throw new Error(data.message);
+    return data.data!;
+  },
+
   getAccessRequestsByResource: async (resourceId: string, params: PaginationParams = {}): Promise<Page<AccessRequestResponse>> => {
     console.log('[ResourceService] Fetching access requests for resource:', resourceId);
     const { data } = await apiClient.get<ApiResponse<Page<AccessRequestResponse>>>(`/api/v1/resources/${resourceId}/access-requests`, { params });

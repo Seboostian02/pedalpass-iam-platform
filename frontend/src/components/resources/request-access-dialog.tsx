@@ -12,7 +12,7 @@ import type { ResourceResponse } from '@/types/resource';
 import { KeyRound } from 'lucide-react';
 
 const requestAccessSchema = z.object({
-  accessLevel: z.string().min(1, 'Access level is required'),
+  accessLevel: z.string().optional(),
   justification: z.string().min(1, 'Justification is required'),
   scheduledStart: z.string().optional(),
   scheduledEnd: z.string().optional(),
@@ -28,6 +28,7 @@ interface RequestAccessDialogProps {
 
 export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDialogProps) {
   const createRequest = useCreateAccessRequest();
+  const isPhysical = resource?.resourceType === 'PHYSICAL';
 
   const form = useForm<RequestAccessForm>({
     resolver: zodResolver(requestAccessSchema),
@@ -39,14 +40,28 @@ export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDi
     },
   });
 
-  console.log('[RequestAccessDialog] Open:', open, 'Resource:', resource?.name);
+  console.log('[RequestAccessDialog] Open:', open, 'Resource:', resource?.name, 'Type:', resource?.resourceType);
 
   const onSubmit = (values: RequestAccessForm) => {
     if (!resource) return;
+
+    // Client-side validation for physical resources
+    if (isPhysical && (!values.scheduledStart || !values.scheduledEnd)) {
+      if (!values.scheduledStart) form.setError('scheduledStart', { message: 'Start date is required' });
+      if (!values.scheduledEnd) form.setError('scheduledEnd', { message: 'End date is required' });
+      return;
+    }
+
+    // Client-side validation for digital resources
+    if (!isPhysical && !values.accessLevel) {
+      form.setError('accessLevel', { message: 'Access level is required' });
+      return;
+    }
+
     console.log('[RequestAccessDialog] Submitting access request for:', resource.id, values);
     createRequest.mutate({
       resourceId: resource.id,
-      accessLevel: values.accessLevel,
+      accessLevel: isPhysical ? 'RESERVE' : values.accessLevel,
       justification: values.justification,
       scheduledStart: values.scheduledStart || undefined,
       scheduledEnd: values.scheduledEnd || undefined,
@@ -65,11 +80,12 @@ export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDi
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <KeyRound className="h-5 w-5" />
-            Request Access
+            {isPhysical ? 'Reserve Resource' : 'Request Access'}
           </DialogTitle>
           {resource && (
             <DialogDescription>
-              Requesting access to <span className="font-medium text-foreground">{resource.name}</span>
+              {isPhysical ? 'Reserving' : 'Requesting access to'}{' '}
+              <span className="font-medium text-foreground">{resource.name}</span>
               {resource.requiresApproval && ' (requires approval)'}
             </DialogDescription>
           )}
@@ -77,28 +93,30 @@ export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDi
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="accessLevel"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Access Level</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="READ">Read</SelectItem>
-                      <SelectItem value="WRITE">Write</SelectItem>
-                      <SelectItem value="ADMIN">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isPhysical && (
+              <FormField
+                control={form.control}
+                name="accessLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Access Level</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="READ">Read</SelectItem>
+                        <SelectItem value="WRITE">Write</SelectItem>
+                        <SelectItem value="ADMIN">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -108,7 +126,9 @@ export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDi
                   <FormLabel>Justification</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Explain why you need access to this resource..."
+                      placeholder={isPhysical
+                        ? "Explain why you need to reserve this resource..."
+                        : "Explain why you need access to this resource..."}
                       rows={3}
                       {...field}
                     />
@@ -124,7 +144,7 @@ export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDi
                 name="scheduledStart"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Date (optional)</FormLabel>
+                    <FormLabel>Start Date{isPhysical ? '' : ' (optional)'}</FormLabel>
                     <FormControl>
                       <Input type="datetime-local" {...field} />
                     </FormControl>
@@ -137,7 +157,7 @@ export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDi
                 name="scheduledEnd"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End Date (optional)</FormLabel>
+                    <FormLabel>End Date{isPhysical ? '' : ' (optional)'}</FormLabel>
                     <FormControl>
                       <Input type="datetime-local" {...field} />
                     </FormControl>
@@ -150,7 +170,7 @@ export function RequestAccessDialog({ resource, open, onClose }: RequestAccessDi
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
               <Button type="submit" disabled={createRequest.isPending}>
-                {createRequest.isPending ? 'Submitting...' : 'Submit Request'}
+                {createRequest.isPending ? 'Submitting...' : isPhysical ? 'Submit Reservation' : 'Submit Request'}
               </Button>
             </div>
           </form>

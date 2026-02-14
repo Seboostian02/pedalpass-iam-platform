@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { RESOURCE_TYPES, RESOURCE_CATEGORIES } from '@/lib/constants';
+import { useResourceFilterOptions } from '@/hooks/use-resources';
 import { Search, X, LayoutGrid, Table2 } from 'lucide-react';
 
 interface ResourceFiltersProps {
@@ -21,6 +21,20 @@ export function ResourceFilters({
   categoryFilter, onCategoryChange,
   viewMode, onViewModeChange,
 }: ResourceFiltersProps) {
+  const { data: allFilters } = useResourceFilterOptions();
+  const { data: filteredByType } = useResourceFilterOptions(typeFilter);
+
+  const availableTypes = allFilters?.types ?? [];
+  const availableCategories = filteredByType?.categories ?? [];
+
+  const handleTypeChange = (value: string) => {
+    onTypeChange(value);
+    // Reset category since available categories will change
+    if (categoryFilter !== 'all') {
+      onCategoryChange('all');
+    }
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative min-w-0 flex-1 basis-full sm:basis-auto sm:max-w-sm">
@@ -43,13 +57,13 @@ export function ResourceFilters({
         )}
       </div>
 
-      <Select value={typeFilter} onValueChange={onTypeChange}>
+      <Select value={typeFilter} onValueChange={handleTypeChange}>
         <SelectTrigger className="w-[calc(50%-6px)] sm:w-[150px]">
           <SelectValue placeholder="Type" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Types</SelectItem>
-          {RESOURCE_TYPES.map((type) => (
+          {availableTypes.map((type) => (
             <SelectItem key={type} value={type}>{type}</SelectItem>
           ))}
         </SelectContent>
@@ -61,7 +75,7 @@ export function ResourceFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Categories</SelectItem>
-          {RESOURCE_CATEGORIES.map((cat) => (
+          {availableCategories.map((cat) => (
             <SelectItem key={cat} value={cat}>{cat.replace('_', ' ')}</SelectItem>
           ))}
         </SelectContent>

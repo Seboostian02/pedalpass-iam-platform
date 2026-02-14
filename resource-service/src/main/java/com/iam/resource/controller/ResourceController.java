@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -28,6 +30,23 @@ public class ResourceController {
     }
 
     // Resource endpoints
+
+    @GetMapping("/resources/filters")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get resource filter options", description = "Retrieve available types and categories from active resources")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Filter options retrieved")
+    })
+    public ResponseEntity<com.iam.common.dto.ApiResponse<Map<String, Object>>> getFilterOptions(
+            @RequestParam(required = false) ResourceType type) {
+        List<ResourceType> types = resourceService.getDistinctTypes();
+        List<ResourceCategory> categories = resourceService.getDistinctCategories(type);
+        Map<String, Object> filters = Map.of(
+                "types", types,
+                "categories", categories
+        );
+        return ResponseEntity.ok(com.iam.common.dto.ApiResponse.success("Filter options retrieved", filters));
+    }
 
     @GetMapping("/resources")
     @PreAuthorize("isAuthenticated()")
