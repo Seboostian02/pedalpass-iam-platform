@@ -195,8 +195,14 @@ Write-Host ""
 Write-Host "  Starting Vite dev server (frontend dev with HMR)..." -ForegroundColor Yellow
 $frontendDir = Join-Path $projectRoot "frontend"
 if (Test-Path (Join-Path $frontendDir "package.json")) {
-    Start-Process -FilePath "npm" -ArgumentList "run","dev" -WorkingDirectory $frontendDir -WindowStyle Hidden
-    Write-Host "  [OK] Vite dev server started on http://localhost:5173" -ForegroundColor Green
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c npm run dev" -WorkingDirectory $frontendDir -WindowStyle Hidden
+    Start-Sleep -Seconds 3
+    $viteCheck = Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue
+    if ($viteCheck) {
+        Write-Host "  [OK] Vite dev server started on http://localhost:5173" -ForegroundColor Green
+    } else {
+        Write-Host "  [OK] Vite dev server launching on http://localhost:5173 (may take a few seconds)" -ForegroundColor Green
+    }
 } else {
     Write-Host "  [WARN] frontend/package.json not found, skipping Vite" -ForegroundColor Yellow
 }
@@ -240,24 +246,33 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host "  IAM Platform is running!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
+Write-Host "Frontend:" -ForegroundColor Cyan
+Write-Host "  Vite Dev (HMR):  http://localhost:5173                  (live editing)" -ForegroundColor White
+Write-Host "  Docker (Nginx):  http://localhost:3000                  (production build)" -ForegroundColor White
+Write-Host ""
 Write-Host "Service URLs:" -ForegroundColor Cyan
-Write-Host "  PedalPass UI:    http://localhost:3000" -ForegroundColor White
-Write-Host "  API Gateway:     http://localhost:8090" -ForegroundColor White
+Write-Host "  API Gateway:     http://localhost:8090                  (redirects to Swagger)" -ForegroundColor White
 Write-Host "  Swagger UI:      http://localhost:8090/swagger-ui.html  (all services dropdown)" -ForegroundColor White
 Write-Host "  pgAdmin4:        http://localhost:5050                  (credentials in .env)" -ForegroundColor White
 Write-Host "  RabbitMQ UI:     http://localhost:15672                 (credentials in .env)" -ForegroundColor White
-Write-Host "  MailHog UI:      http://localhost:8025" -ForegroundColor White
+Write-Host "  MailHog UI:      http://localhost:8025                  (persistent emails)" -ForegroundColor White
 Write-Host "  PostgreSQL:      localhost:5432                         (credentials in .env)" -ForegroundColor White
 Write-Host ""
 Write-Host "Swagger per service:" -ForegroundColor Cyan
-Write-Host "  Auth Service:    http://localhost:8081/swagger-ui/index.html" -ForegroundColor White
-Write-Host "  User Service:    http://localhost:8082/swagger-ui/index.html" -ForegroundColor White
+Write-Host "  Auth Service:         http://localhost:8081/swagger-ui/index.html" -ForegroundColor White
+Write-Host "  User Service:         http://localhost:8082/swagger-ui/index.html" -ForegroundColor White
+Write-Host "  Resource Service:     http://localhost:8083/swagger-ui/index.html" -ForegroundColor White
+Write-Host "  Audit Service:        http://localhost:8084/swagger-ui/index.html" -ForegroundColor White
+Write-Host "  Notification Service: http://localhost:8085/swagger-ui/index.html" -ForegroundColor White
 Write-Host ""
 Write-Host "Useful commands:" -ForegroundColor Cyan
-Write-Host "  docker compose logs -f auth-service      # View service logs" -ForegroundColor White
-Write-Host "  docker compose ps                        # Check container status" -ForegroundColor White
-Write-Host "  .\scripts\restart-dev.ps1                # Restart everything" -ForegroundColor White
-Write-Host "  .\scripts\stop-dev.ps1                   # Stop everything" -ForegroundColor White
+Write-Host "  docker compose logs -f <service>                        # View service logs" -ForegroundColor White
+Write-Host "  docker compose ps                                       # Check container status" -ForegroundColor White
+Write-Host "  docker compose up -d --build <service>                  # Rebuild & restart one service" -ForegroundColor White
+Write-Host "  docker compose restart <service>                        # Restart without rebuild" -ForegroundColor White
+Write-Host "  docker compose up -d --build api-gateway                # After gateway code changes" -ForegroundColor White
+Write-Host "  .\scripts\restart-dev.ps1                               # Restart everything" -ForegroundColor White
+Write-Host "  .\scripts\stop-dev.ps1                                  # Stop everything" -ForegroundColor White
 Write-Host ""
 
 Pop-Location

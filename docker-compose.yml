@@ -62,6 +62,11 @@ services:
   mailhog:
     image: mailhog/mailhog:latest
     container_name: iam-mailhog
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: /maildir
+    volumes:
+      - mailhog_data:/maildir
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -311,6 +316,7 @@ volumes:
   rabbitmq_data:
   redis_data:
   pgadmin_data:
+  mailhog_data:
 
 networks:
   iam-network:
