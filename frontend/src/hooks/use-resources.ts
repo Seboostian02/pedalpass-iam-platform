@@ -1,0 +1,105 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { resourceService } from '@/services/resource.service';
+import type { PaginationParams } from '@/types/api';
+import type { CreateResourceRequest, UpdateResourceRequest, ResourceType, ResourceCategory } from '@/types/resource';
+import { toast } from 'sonner';
+import i18n from '@/lib/i18n';
+
+export function useResources(params: PaginationParams = {}, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ['resources', params],
+    queryFn: () => resourceService.getResources(params),
+    ...options,
+  });
+}
+
+export function useResource(id: string) {
+  return useQuery({
+    queryKey: ['resources', id],
+    queryFn: () => resourceService.getResourceById(id),
+    enabled: !!id,
+  });
+}
+
+export function useResourcesByType(type: ResourceType, params: PaginationParams = {}) {
+  return useQuery({
+    queryKey: ['resources', 'type', type, params],
+    queryFn: () => resourceService.getResourcesByType(type, params),
+  });
+}
+
+export function useResourcesByCategory(category: ResourceCategory, params: PaginationParams = {}) {
+  return useQuery({
+    queryKey: ['resources', 'category', category, params],
+    queryFn: () => resourceService.getResourcesByCategory(category, params),
+  });
+}
+
+export function useResourceFilterOptions(type?: string) {
+  return useQuery({
+    queryKey: ['resources', 'filters', type],
+    queryFn: () => resourceService.getFilterOptions(type === 'all' ? undefined : type),
+  });
+}
+
+export function useResourceReservations(resourceId: string, from: string, to: string) {
+  return useQuery({
+    queryKey: ['resources', resourceId, 'reservations', from, to],
+    queryFn: () => resourceService.getReservations(resourceId, from, to),
+    enabled: !!resourceId && !!from && !!to,
+  });
+}
+
+export function useAllReservations(from: string, to: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['reservations', 'all', from, to],
+    queryFn: () => resourceService.getAllReservations(from, to),
+    enabled: enabled && !!from && !!to,
+  });
+}
+
+export function useCreateResource() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (request: CreateResourceRequest) => resourceService.createResource(request),
+    onSuccess: () => {
+      console.log('[useCreateResource] Mutation success');
+      queryClient.invalidateQueries({ queryKey: ['resources'] });
+      toast.success(i18n.t('toast.resourceCreated'));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || i18n.t('toast.failedCreateResource'));
+    },
+  });
+}
+
+export function useUpdateResource() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, request }: { id: string; request: UpdateResourceRequest }) =>
+      resourceService.updateResource(id, request),
+    onSuccess: () => {
+      console.log('[useUpdateResource] Mutation success');
+      queryClient.invalidateQueries({ queryKey: ['resources'] });
+      toast.success(i18n.t('toast.resourceUpdated'));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || i18n.t('toast.failedUpdateResource'));
+    },
+  });
+}
+
+export function useDeactivateResource() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => resourceService.deactivateResource(id),
+    onSuccess: () => {
+      console.log('[useDeactivateResource] Mutation success');
+      queryClient.invalidateQueries({ queryKey: ['resources'] });
+      toast.success(i18n.t('toast.resourceDeactivated'));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || i18n.t('toast.failedDeactivateResource'));
+    },
+  });
+}

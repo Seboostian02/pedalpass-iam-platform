@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "IAM Platform PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "iam_admin",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpass"
+    }
+  }
+}

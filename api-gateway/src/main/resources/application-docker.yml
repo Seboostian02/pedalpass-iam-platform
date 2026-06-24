@@ -1,0 +1,70 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - StripPrefix=0
+        - id: user-service
+          uri: http://user-service:8082
+          predicates:
+            - Path=/api/v1/users/**, /api/v1/roles/**, /api/v1/departments/**
+          filters:
+            - StripPrefix=0
+        - id: resource-service
+          uri: http://resource-service:8083
+          predicates:
+            - Path=/api/v1/resources/**, /api/v1/access-requests/**
+          filters:
+            - StripPrefix=0
+        - id: audit-service
+          uri: http://audit-service:8084
+          predicates:
+            - Path=/api/v1/audit/**
+          filters:
+            - StripPrefix=0
+        - id: notification-service
+          uri: http://notification-service:8085
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - StripPrefix=0
+        - id: auth-service-docs
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/v3/api-docs/auth-service
+          filters:
+            - RewritePath=/v3/api-docs/auth-service, /v3/api-docs
+        - id: user-service-docs
+          uri: http://user-service:8082
+          predicates:
+            - Path=/v3/api-docs/user-service
+          filters:
+            - RewritePath=/v3/api-docs/user-service, /v3/api-docs
+        - id: resource-service-docs
+          uri: http://resource-service:8083
+          predicates:
+            - Path=/v3/api-docs/resource-service
+          filters:
+            - RewritePath=/v3/api-docs/resource-service, /v3/api-docs
+        - id: audit-service-docs
+          uri: http://audit-service:8084
+          predicates:
+            - Path=/v3/api-docs/audit-service
+          filters:
+            - RewritePath=/v3/api-docs/audit-service, /v3/api-docs
+        - id: notification-service-docs
+          uri: http://notification-service:8085
+          predicates:
+            - Path=/v3/api-docs/notification-service
+          filters:
+            - RewritePath=/v3/api-docs/notification-service, /v3/api-docs
+  data:
+    redis:
+      host: redis
